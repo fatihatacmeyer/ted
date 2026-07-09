@@ -1,0 +1,32 @@
+.dashboard {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.welcome-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  padding: 3rem 4rem;
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #dc2134;
+  margin: 0 0 1rem;
+}
+
+.welcome-text {
+  font-size: 1.125rem;
+  color: #444652;
+  line-height: 1.6;
+  margin: 0;
+}

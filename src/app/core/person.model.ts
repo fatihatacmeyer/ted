@@ -1,0 +1,32 @@
+export interface Person {
+  id: number;
+  ad: string;
+  soyad: string;
+  adsoyad: string;
+  sicilno: string;
+  personelno: string;
+  userid: string;
+  firmaad: string;
+  bolumad: string;
+  pozisyonad: string;
+  altfirmaad: string;
+  direktorlukad: string;
+  gorevad: string;
+  yakaad: string;
+  credit: number;
+  indirimorani: number;
+  ceptelefon: string;
+  mesaiperiyodu: number;
+  mesaiperiyoduad: string;
+  cikistarih: string | null;
+  lyetki: number;
+  lkademe: number;
+  userdef: number;
+  userdefad: string;
+  cardid: string;
+  yetkistr: string;
+  yetkistrad: string;
+  islemno: string;
+  islemsonuc: number;
+  sunucucevap: string | null;
+}

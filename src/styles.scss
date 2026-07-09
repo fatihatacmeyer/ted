@@ -1,0 +1,54 @@
+
+@import url("https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700|Roboto:300,400,500,600,700");
+@import "primeicons/primeicons.css";
+
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Manrope', sans-serif;
+}
+
+* {
+  font-family: 'Manrope', sans-serif;
+}
+
+
+.home-container {
+  padding: 30px;
+  font-family: 'Manrope', sans-serif;
+  background-color: #fcf9f8;
+
+  .title-section {
+    margin-bottom: 20px;
+    h3 {
+      color: #dc2134;
+      margin: 0;
+      font-weight: 800;
+      font-size: 20px;
+    }
+  }
+
+  .loading-box {
+    padding: 20px;
+    background-color: #fce4ec;
+    border-left: 4px solid #dc2134;
+    color: #93000a;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-bottom: 20px; /* Alttaki tabloyla yapışmasın diye eklendi */
+  }
+
+  .error-box {
+    padding: 20px;
+    background-color: #ffdad6;
+    border-left: 4px solid #dc2134;
+    color: #93000a;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-bottom: 20px; /* Alttaki tabloyla yapışmasın diye eklendi */
+  }
+}
