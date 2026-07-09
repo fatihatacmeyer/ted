@@ -64,4 +64,41 @@ export class PersonService {
 
     return this.http.post<Person[]>(apiUrl, payload, { headers });
   }
+
+  insertPerson(personData: any): Observable<any> {
+    const apiUrl = `${this.config.apiUrl}/Person`;
+
+    const paramString =
+      'islemtipi=i' +
+      '&id=0' +
+      '&ad=' +
+      (personData.ad || '') +
+      '&soyad=' +
+      (personData.soyad || '') +
+      '&sicilno=' +
+      (personData.sicilno || '') +
+      '&personelno=' +
+      (personData.personelno || '') +
+      '&userdef=' +
+      personData.userdef +
+      '&aktif=1';
+
+    console.log(paramString);
+    const payload = {
+      Param: paramString,
+      FotoImage: JSON.stringify([]),
+    };
+
+    const currentUser = this.authService.currentUserValue;
+    let userToken = '';
+    if (currentUser && currentUser.tokenid) {
+      userToken = currentUser.tokenid;
+    }
+
+    const headers = new HttpHeaders({
+      Authorization: userToken,
+    });
+
+    return this.http.post<any>(apiUrl, payload, { headers });
+  }
 }

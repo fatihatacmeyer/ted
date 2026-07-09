@@ -42,4 +42,36 @@ export class StudentsComponent implements OnInit {
       },
     });
   }
+
+  addNewPerson(): void {
+    const mockData = {
+      ad: 'Ahmet',
+      soyad: 'Yılmaz',
+      sicilno: 'S-1002',
+      userdef: '11',
+    };
+
+    try {
+      this.personService.insertPerson(mockData).subscribe({
+        next: (response: any) => {
+          // Eski projedeki "islemsonuc == 1" kontrolü
+          if (response && response[0] && response[0].islemsonuc == '1') {
+            console.log('Sicil Başarıyla Eklendi');
+            this.fetchPersonList(); // Listeyi yenile
+          } else {
+            this.errorMessage = 'Ekleme başarısız oldu (Sunucu hatası).';
+          }
+        },
+        error: (err: any) => {
+          console.error('API isteği sırasında hata oluştu', err);
+          this.errorMessage = 'Sistem hatası oluştu.';
+        },
+      });
+    } catch (validationError: any) {
+      // Eğer userdef 11 veya 20 dışında bir şey gelirse doğrudan buraya düşecek (API'ye gitmeyecek)
+      console.warn(validationError.message);
+      this.errorMessage = validationError.message;
+      this.cdr.detectChanges();
+    }
+  }
 }

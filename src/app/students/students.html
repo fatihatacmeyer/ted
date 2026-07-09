@@ -16,6 +16,7 @@
   }
 
   @if (!isLoading && !errorMessage) {
+    <button (click)="addNewPerson()">Öğrenci Ekle (MOCK)</button>
     <app-person-table [persons]="persons"></app-person-table>
   }
 </div>
