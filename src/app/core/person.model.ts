@@ -37,11 +37,43 @@ export interface Person {
  * userdef: 11 = Öğrenci, 12 = Öğretmen, 13 = Veli
  */
 export interface PersonInsertRequest {
+  // Kişisel Bilgiler
   ad: string;
   soyad: string;
+  dogumtarih?: string;
+  cinsiyet?: string;
+  kangrubu?: string;
+
+  // Kimlik / Numara
   sicilno?: string;
   personelno?: string;
+  cardid?: string;
+
+  // İletişim
+  ceptelefon?: string;
+  telefon1?: string;
+  email?: string;
+
+  // Adres
+  adres?: string;
+  il?: string;
+  ilce?: string;
+
+  // Kurumsal
+  firma?: string;
+  bolum?: string;
+  pozisyon?: string;
+  gorev?: string;
+  altfirma?: string;
+  direktorluk?: string;
+  yaka?: string;
+  giristarih?: string;
+
+  // Sistem
   userdef: number;
+
+  // Fotoğraf (base64 data-URL veya null)
+  fotoImage?: string | null;
 }
 
 /** Backend'in Person/Login gibi endpoint'lerden döndüğü ortak sonuç formatı. */

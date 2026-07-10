@@ -1,36 +1,247 @@
 <p-dialog
   [(visible)]="visible"
   [modal]="true"
-  [style]="{ width: '420px' }"
+  [style]="{ width: '600px' }"
   [draggable]="false"
   (onHide)="close()"
   [header]="title"
+  [baseZIndex]="10000"
 >
-  <form [formGroup]="form" (ngSubmit)="submit()">
-    <div class="field">
-      <label for="ad">Ad</label>
-      <input pInputText id="ad" formControlName="ad" />
-      @if (form.get('ad')?.invalid && form.get('ad')?.touched) {
-        <small class="field-error">Ad zorunludur.</small>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="person-form">
+    <!-- Fotoğraf -->
+    <div class="form-section">
+      <h5>Fotoğraf</h5>
+      @if (selectedPhoto) {
+        <div class="photo-preview">
+          <img [src]="selectedPhoto" alt="Ön izleme" />
+          <button
+            pButton
+            type="button"
+            icon="pi pi-times"
+            class="p-button-danger p-button-rounded p-button-sm remove-photo"
+            (click)="removePhoto()"
+            pTooltip="Fotoğrafı kaldır"
+            tooltipPosition="top"
+          ></button>
+        </div>
+        <div class="photo-file-name">{{ photoFileName }}</div>
+      } @else {
+        <label class="photo-upload-area" for="photoInput">
+          <i class="pi pi-camera"></i>
+          <span>Fotoğraf yüklemek için tıklayın</span>
+          <span class="photo-hint">JPG, PNG — Max 5MB</span>
+          <input
+            type="file"
+            id="photoInput"
+            accept="image/*"
+            (change)="onPhotoSelected($event)"
+            class="hidden-file-input"
+          />
+        </label>
       }
     </div>
-
-    <div class="field">
-      <label for="soyad">Soyad</label>
-      <input pInputText id="soyad" formControlName="soyad" />
-      @if (form.get('soyad')?.invalid && form.get('soyad')?.touched) {
-        <small class="field-error">Soyad zorunludur.</small>
-      }
+    <!-- Kişisel Bilgiler -->
+    <div class="form-section">
+      <h5>Kişisel Bilgiler</h5>
+      <div class="field-row">
+        <div class="field">
+          <label for="ad">Ad <span class="required">*</span></label>
+          <input pInputText id="ad" formControlName="ad" placeholder="Ad giriniz" />
+          @if (form.get('ad')?.invalid && form.get('ad')?.touched) {
+            <small class="field-error">Ad zorunludur.</small>
+          }
+        </div>
+        <div class="field">
+          <label for="soyad">Soyad <span class="required">*</span></label>
+          <input pInputText id="soyad" formControlName="soyad" placeholder="Soyad giriniz" />
+          @if (form.get('soyad')?.invalid && form.get('soyad')?.touched) {
+            <small class="field-error">Soyad zorunludur.</small>
+          }
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="dogumtarih">Doğum Tarihi</label>
+          <p-datepicker
+            id="dogumtarih"
+            formControlName="dogumtarih"
+            [showIcon]="true"
+            dateFormat="dd.mm.yy"
+            [showOnFocus]="false"
+            appendTo="body"
+            placeholder="Tarih seçiniz"
+            styleClass="w-100"
+          />
+        </div>
+        <div class="field-row-half">
+          <div class="field">
+            <label for="cinsiyet">Cinsiyet</label>
+            <p-select
+              id="cinsiyet"
+              formControlName="cinsiyet"
+              [options]="cinsiyetOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Seçiniz"
+              styleClass="w-100"
+            />
+          </div>
+          <div class="field">
+            <label for="kangrubu">Kan Grubu</label>
+            <p-select
+              id="kangrubu"
+              formControlName="kangrubu"
+              [options]="kangrubuOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Seçiniz"
+              styleClass="w-100"
+            />
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="field">
-      <label for="sicilno">Sicil No</label>
-      <input pInputText id="sicilno" formControlName="sicilno" />
+    <!-- Kimlik Bilgileri -->
+    <div class="form-section">
+      <h5>Kimlik Bilgileri</h5>
+      <div class="field-row">
+        <div class="field">
+          <label for="sicilno">Sicil No</label>
+          <input pInputText id="sicilno" formControlName="sicilno" placeholder="Sicil numarası" />
+        </div>
+        <div class="field">
+          <label for="personelno">Personel No</label>
+          <input
+            pInputText
+            id="personelno"
+            formControlName="personelno"
+            placeholder="Personel numarası"
+          />
+        </div>
+      </div>
+      <div class="field">
+        <label for="cardid">Kart ID</label>
+        <input pInputText id="cardid" formControlName="cardid" placeholder="Kart numarası" />
+      </div>
     </div>
 
-    <div class="field">
-      <label for="personelno">Personel No</label>
-      <input pInputText id="personelno" formControlName="personelno" />
+    <!-- İletişim -->
+    <div class="form-section">
+      <h5>İletişim</h5>
+      <div class="field-row">
+        <div class="field">
+          <label for="ceptelefon">Cep Telefonu</label>
+          <input
+            pInputText
+            id="ceptelefon"
+            formControlName="ceptelefon"
+            placeholder="05XX XXX XX XX"
+          />
+        </div>
+        <div class="field">
+          <label for="telefon1">Telefon</label>
+          <input
+            pInputText
+            id="telefon1"
+            formControlName="telefon1"
+            placeholder="Telefon numarası"
+          />
+        </div>
+      </div>
+      <div class="field">
+        <label for="email">E-posta</label>
+        <input
+          pInputText
+          id="email"
+          formControlName="email"
+          placeholder="ornek@example.com"
+          type="email"
+        />
+      </div>
+    </div>
+
+    <!-- Adres -->
+    <div class="form-section">
+      <h5>Adres</h5>
+      <div class="field">
+        <label for="adres">Adres</label>
+        <textarea
+          pTextarea
+          id="adres"
+          formControlName="adres"
+          rows="2"
+          placeholder="Açık adres"
+          style="resize: vertical"
+        ></textarea>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="il">İl</label>
+          <input pInputText id="il" formControlName="il" placeholder="İl" />
+        </div>
+        <div class="field">
+          <label for="ilce">İlçe</label>
+          <input pInputText id="ilce" formControlName="ilce" placeholder="İlçe" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Kurumsal -->
+    <div class="form-section">
+      <h5>Kurumsal Bilgiler</h5>
+      <div class="field">
+        <label for="firma">Firma</label>
+        <input pInputText id="firma" formControlName="firma" placeholder="Firma adı" />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="bolum">Bölüm</label>
+          <input pInputText id="bolum" formControlName="bolum" placeholder="Bölüm" />
+        </div>
+        <div class="field">
+          <label for="pozisyon">Pozisyon</label>
+          <input pInputText id="pozisyon" formControlName="pozisyon" placeholder="Pozisyon" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="gorev">Görev</label>
+          <input pInputText id="gorev" formControlName="gorev" placeholder="Görev" />
+        </div>
+        <div class="field">
+          <label for="yaka">Yaka</label>
+          <input pInputText id="yaka" formControlName="yaka" placeholder="Yaka tipi" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="altfirma">Alt Firma</label>
+          <input pInputText id="altfirma" formControlName="altfirma" placeholder="Alt firma" />
+        </div>
+        <div class="field">
+          <label for="direktorluk">Direktörlük</label>
+          <input
+            pInputText
+            id="direktorluk"
+            formControlName="direktorluk"
+            placeholder="Direktörlük"
+          />
+        </div>
+      </div>
+      <div class="field">
+        <label for="giristarih">Giriş Tarihi</label>
+        <p-datepicker
+          id="giristarih"
+          formControlName="giristarih"
+          [showIcon]="true"
+          dateFormat="dd.mm.yy"
+          [showOnFocus]="false"
+          appendTo="body"
+          placeholder="Tarih seçiniz"
+          styleClass="w-100"
+        />
+      </div>
     </div>
 
     @if (errorMessage) {
@@ -46,6 +257,7 @@
         type="submit"
         [label]="isSaving ? 'Kaydediliyor...' : 'Kaydet'"
         [disabled]="isSaving"
+        icon="pi pi-check"
       ></button>
     </div>
   </form>
