@@ -2,18 +2,22 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { PersonService } from '../services/person.service';
 import { Person } from '../core/person.model';
 import { PersonTableComponent } from '../shared/person-table/person-table';
-
+import { PersonFormComponent } from '../person-form/person-form';
 @Component({
   selector: 'app-students',
   standalone: true,
-  imports: [PersonTableComponent],
+  imports: [PersonTableComponent, PersonFormComponent],
   templateUrl: './students.html',
   styleUrl: './students.scss',
 })
 export class StudentsComponent implements OnInit {
+  /** Öğrenci sicilleri için sabit userdef değeri. */
+  readonly USERDEF = 11;
+
   persons: Person[] = [];
   isLoading: boolean = false;
   errorMessage: string = '';
+  showAddDialog = false;
 
   constructor(
     private personService: PersonService,
@@ -30,7 +34,7 @@ export class StudentsComponent implements OnInit {
 
     this.personService.getPersonList().subscribe({
       next: (data: Person[]) => {
-        this.persons = data.filter((p) => p.userdef === 11);
+        this.persons = data.filter((p) => p.userdef === this.USERDEF);
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -43,35 +47,11 @@ export class StudentsComponent implements OnInit {
     });
   }
 
-  addNewPerson(): void {
-    const mockData = {
-      ad: 'Ahmet',
-      soyad: 'Yılmaz',
-      sicilno: 'S-1002',
-      userdef: '11',
-    };
+  openAddDialog(): void {
+    this.showAddDialog = true;
+  }
 
-    try {
-      this.personService.insertPerson(mockData).subscribe({
-        next: (response: any) => {
-          // Eski projedeki "islemsonuc == 1" kontrolü
-          if (response && response[0] && response[0].islemsonuc == '1') {
-            console.log('Sicil Başarıyla Eklendi');
-            this.fetchPersonList(); // Listeyi yenile
-          } else {
-            this.errorMessage = 'Ekleme başarısız oldu (Sunucu hatası).';
-          }
-        },
-        error: (err: any) => {
-          console.error('API isteği sırasında hata oluştu', err);
-          this.errorMessage = 'Sistem hatası oluştu.';
-        },
-      });
-    } catch (validationError: any) {
-      // Eğer userdef 11 veya 20 dışında bir şey gelirse doğrudan buraya düşecek (API'ye gitmeyecek)
-      console.warn(validationError.message);
-      this.errorMessage = validationError.message;
-      this.cdr.detectChanges();
-    }
+  onPersonSaved(): void {
+    this.fetchPersonList();
   }
 }

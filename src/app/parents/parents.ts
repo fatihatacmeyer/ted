@@ -2,18 +2,22 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { PersonService } from '../services/person.service';
 import { Person } from '../core/person.model';
 import { PersonTableComponent } from '../shared/person-table/person-table';
-
+import { PersonFormComponent } from '../person-form/person-form';
 @Component({
   selector: 'app-parents',
   standalone: true,
-  imports: [PersonTableComponent],
+  imports: [PersonTableComponent, PersonFormComponent],
   templateUrl: './parents.html',
   styleUrl: './parents.scss',
 })
 export class ParentsComponent implements OnInit {
+  /** Veli sicilleri için sabit userdef değeri. */
+  readonly USERDEF = 13;
+
   persons: Person[] = [];
   isLoading: boolean = false;
   errorMessage: string = '';
+  showAddDialog = false;
 
   constructor(
     private personService: PersonService,
@@ -30,7 +34,7 @@ export class ParentsComponent implements OnInit {
 
     this.personService.getPersonList().subscribe({
       next: (data: Person[]) => {
-        this.persons = data.filter((p) => p.userdef === 13);
+        this.persons = data.filter((p) => p.userdef === this.USERDEF);
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -41,5 +45,13 @@ export class ParentsComponent implements OnInit {
         this.cdr.detectChanges();
       },
     });
+  }
+
+  openAddDialog(): void {
+    this.showAddDialog = true;
+  }
+
+  onPersonSaved(): void {
+    this.fetchPersonList();
   }
 }

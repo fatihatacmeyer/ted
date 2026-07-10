@@ -1,0 +1,52 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '420px' }"
+  [draggable]="false"
+  (onHide)="close()"
+  [header]="title"
+>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="field">
+      <label for="ad">Ad</label>
+      <input pInputText id="ad" formControlName="ad" />
+      @if (form.get('ad')?.invalid && form.get('ad')?.touched) {
+        <small class="field-error">Ad zorunludur.</small>
+      }
+    </div>
+
+    <div class="field">
+      <label for="soyad">Soyad</label>
+      <input pInputText id="soyad" formControlName="soyad" />
+      @if (form.get('soyad')?.invalid && form.get('soyad')?.touched) {
+        <small class="field-error">Soyad zorunludur.</small>
+      }
+    </div>
+
+    <div class="field">
+      <label for="sicilno">Sicil No</label>
+      <input pInputText id="sicilno" formControlName="sicilno" />
+    </div>
+
+    <div class="field">
+      <label for="personelno">Personel No</label>
+      <input pInputText id="personelno" formControlName="personelno" />
+    </div>
+
+    @if (errorMessage) {
+      <div class="error-box">
+        <p>{{ errorMessage }}</p>
+      </div>
+    }
+
+    <div class="actions">
+      <button pButton type="button" label="Vazgeç" class="p-button-text" (click)="close()"></button>
+      <button
+        pButton
+        type="submit"
+        [label]="isSaving ? 'Kaydediliyor...' : 'Kaydet'"
+        [disabled]="isSaving"
+      ></button>
+    </div>
+  </form>
+</p-dialog>

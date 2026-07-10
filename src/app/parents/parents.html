@@ -16,6 +16,14 @@
   }
 
   @if (!isLoading && !errorMessage) {
+    <button (click)="openAddDialog()">Veli Ekle</button>
     <app-person-table [persons]="persons"></app-person-table>
   }
 </div>
+
+<app-person-form
+  [(visible)]="showAddDialog"
+  [userdef]="USERDEF"
+  title="Yeni Veli Ekle"
+  (saved)="onPersonSaved()"
+></app-person-form>

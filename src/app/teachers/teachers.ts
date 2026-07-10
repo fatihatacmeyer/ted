@@ -2,18 +2,23 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { PersonService } from '../services/person.service';
 import { Person } from '../core/person.model';
 import { PersonTableComponent } from '../shared/person-table/person-table';
+import { PersonFormComponent } from '../person-form/person-form';
 
 @Component({
   selector: 'app-teachers',
   standalone: true,
-  imports: [PersonTableComponent],
+  imports: [PersonTableComponent, PersonFormComponent],
   templateUrl: './teachers.html',
   styleUrl: './teachers.scss',
 })
 export class TeachersComponent implements OnInit {
+  /** Öğretmen sicilleri için sabit userdef değeri. */
+  readonly USERDEF = 12;
+
   persons: Person[] = [];
   isLoading: boolean = false;
   errorMessage: string = '';
+  showAddDialog = false;
 
   constructor(
     private personService: PersonService,
@@ -30,7 +35,7 @@ export class TeachersComponent implements OnInit {
 
     this.personService.getPersonList().subscribe({
       next: (data: Person[]) => {
-        this.persons = data.filter((p) => p.userdef === 12);
+        this.persons = data.filter((p) => p.userdef === this.USERDEF);
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -41,5 +46,13 @@ export class TeachersComponent implements OnInit {
         this.cdr.detectChanges();
       },
     });
+  }
+
+  openAddDialog(): void {
+    this.showAddDialog = true;
+  }
+
+  onPersonSaved(): void {
+    this.fetchPersonList();
   }
 }

@@ -30,3 +30,23 @@ export interface Person {
   islemsonuc: number;
   sunucucevap: string | null;
 }
+
+/**
+ * Yeni sicil (kayıt) ekleme isteği için kullanılan DTO.
+ * Formdan gelen alanlar + hangi component'ten geldiğini belirten userdef.
+ * userdef: 11 = Öğrenci, 12 = Öğretmen, 13 = Veli
+ */
+export interface PersonInsertRequest {
+  ad: string;
+  soyad: string;
+  sicilno?: string;
+  personelno?: string;
+  userdef: number;
+}
+
+/** Backend'in Person/Login gibi endpoint'lerden döndüğü ortak sonuç formatı. */
+export interface IslemSonucResponse {
+  islemsonuc: number | string;
+  islemno?: string;
+  sunucucevap?: string | null;
+}
