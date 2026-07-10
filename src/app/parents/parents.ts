@@ -3,10 +3,12 @@ import { PersonService } from '../services/person.service';
 import { Person } from '../core/person.model';
 import { PersonTableComponent } from '../shared/person-table/person-table';
 import { PersonFormComponent } from '../person-form/person-form';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 @Component({
   selector: 'app-parents',
   standalone: true,
-  imports: [PersonTableComponent, PersonFormComponent],
+  imports: [PersonTableComponent, PersonFormComponent, ButtonModule, ProgressSpinnerModule],
   templateUrl: './parents.html',
   styleUrl: './parents.scss',
 })

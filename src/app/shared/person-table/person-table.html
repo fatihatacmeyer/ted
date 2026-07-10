@@ -1,92 +1,84 @@
-<div class="table-wrapper">
-  <p-table
-    [value]="persons"
-    [paginator]="true"
-    [rows]="10"
-    [rowsPerPageOptions]="[10, 25, 50]"
-    [scrollable]="true"
-    scrollHeight="600px"
-    styleClass="p-datatable-sm p-datatable-striped p-datatable-gridlines"
-  >
-    <ng-template pTemplate="header">
-      <tr>
-        <th pSortableColumn="id">ID <p-sortIcon field="id"></p-sortIcon></th>
-        <th pSortableColumn="ad">Ad <p-sortIcon field="ad"></p-sortIcon></th>
-        <th pSortableColumn="soyad">Soyad <p-sortIcon field="soyad"></p-sortIcon></th>
-        <th pSortableColumn="sicilno">Sicil No <p-sortIcon field="sicilno"></p-sortIcon></th>
-        <th pSortableColumn="personelno">
-          Personel No <p-sortIcon field="personelno"></p-sortIcon>
-        </th>
-        <th>User ID</th>
-        <th pSortableColumn="firmaad">Firma Adı <p-sortIcon field="firmaad"></p-sortIcon></th>
-        <th pSortableColumn="bolumad">Bölüm Adı <p-sortIcon field="bolumad"></p-sortIcon></th>
-        <th pSortableColumn="pozisyonad">
-          Pozisyon Adı <p-sortIcon field="pozisyonad"></p-sortIcon>
-        </th>
-        <th>Alt Firma Adı</th>
-        <th>Direktörlük Adı</th>
-        <th>Görev Adı</th>
-        <th>Yaka Adı</th>
-        <th>Kredi</th>
-        <th>İndirim Oranı</th>
-        <th>Cep Telefonu</th>
-        <th>Mesai Periyodu</th>
-        <th>Mesai Periyodu Adı</th>
-        <th>Çıkış Tarihi</th>
-        <th>L Yetki</th>
-        <th>L Kademe</th>
-        <th>User Def</th>
-        <th>User Def Adı</th>
-        <th>Kart ID</th>
-        <th>Yetki Str</th>
-        <th>Yetki Str Adı</th>
-      </tr>
-      <tr>
-        <th></th>
-        <th><p-columnFilter type="text" field="ad" placeholder="Ara"></p-columnFilter></th>
-        <th><p-columnFilter type="text" field="soyad" placeholder="Ara"></p-columnFilter></th>
-        <th><p-columnFilter type="text" field="sicilno" placeholder="Ara"></p-columnFilter></th>
-        <th colspan="22"></th>
-      </tr>
-    </ng-template>
+<div class="table-toolbar mb-3">
+  <p-floatlabel variant="on" class="table-search">
+    <p-iconfield>
+      <p-inputicon class="pi pi-search" />
+      <input
+        pInputText
+        id="person_search"
+        [(ngModel)]="filterText"
+        (ngModelChange)="dt.filterGlobal($event, 'contains')"
+        autocomplete="off"
+      />
+    </p-iconfield>
+    <label for="person_search">Arama</label>
+  </p-floatlabel>
 
-    <ng-template pTemplate="body" let-person>
-      <tr>
-        <td>{{ person.id }}</td>
-        <td>{{ person.ad }}</td>
-        <td>{{ person.soyad }}</td>
-        <td>{{ person.sicilno }}</td>
-        <td>{{ person.personelno }}</td>
-        <td>{{ person.userid }}</td>
-        <td>{{ person.firmaad }}</td>
-        <td>{{ person.bolumad }}</td>
-        <td>{{ person.pozisyonad }}</td>
-        <td>{{ person.altfirmaad }}</td>
-        <td>{{ person.direktorlukad }}</td>
-        <td>{{ person.gorevad }}</td>
-        <td>{{ person.yakaad }}</td>
-        <td>{{ person.credit }}</td>
-        <td>{{ person.indirimorani }}%</td>
-        <td>{{ person.ceptelefon }}</td>
-        <td>{{ person.mesaiperiyodu }}</td>
-        <td>{{ person.mesaiperiyoduad }}</td>
-        <td>{{ person.cikistarih ? person.cikistarih : '-' }}</td>
-        <td>{{ person.lyetki }}</td>
-        <td>{{ person.lkademe }}</td>
-        <td>{{ person.userdef }}</td>
-        <td>{{ person.userdefad }}</td>
-        <td>{{ person.cardid }}</td>
-        <td>{{ person.yetkistr }}</td>
-        <td>{{ person.yetkistrad }}</td>
-      </tr>
-    </ng-template>
-
-    <ng-template pTemplate="emptymessage">
-      <tr>
-        <td colspan="30" class="empty-cell" style="text-align: center; padding: 20px">
-          Herhangi bir kayıt bulunamadı.
-        </td>
-      </tr>
-    </ng-template>
-  </p-table>
+  <p-multiselect
+    [options]="allColumns"
+    [(ngModel)]="selectedColumnFields"
+    optionLabel="header"
+    optionValue="field"
+    placeholder="Sütun Seç"
+    display="chip"
+    [style]="{ minWidth: '220px' }"
+    [showHeader]="true"
+    [showClear]="true"
+  />
 </div>
+
+<p-table
+  #dt
+  [value]="persons"
+  [loading]="loading"
+  size="small"
+  [globalFilterFields]="globalFilterFields"
+  [paginator]="true"
+  [rows]="10"
+  [rowsPerPageOptions]="[10, 25, 50]"
+  [showCurrentPageReport]="true"
+  currentPageReportTemplate="{first}-{last} / {totalRecords}"
+  responsiveLayout="scroll"
+  class="admin-table"
+>
+  <ng-template pTemplate="header">
+    <tr>
+      @for (col of getVisibleColumns(); track col.field) {
+        @if (col.sortable) {
+          <th [pSortableColumn]="col.field" [ngClass]="'col-' + col.field">
+            {{ col.header }}
+            <p-sortIcon [field]="col.field" />
+          </th>
+        } @else {
+          <th [ngClass]="'col-' + col.field">{{ col.header }}</th>
+        }
+      }
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-person>
+    <tr>
+      @for (col of getVisibleColumns(); track col.field) {
+        <td [ngClass]="'col-' + col.field">
+          @if (col.field === 'cikistarih') {
+            <span class="cell-text">{{ getFieldValue(person, col.field) ?? '-' }}</span>
+          } @else if (col.field === 'indirimorani') {
+            <span class="metric-badge">{{ getFieldValue(person, col.field) }}%</span>
+          } @else {
+            <span class="cell-text">{{ getFieldValue(person, col.field) }}</span>
+          }
+        </td>
+      }
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td [attr.colspan]="getVisibleColumns().length">
+        <div class="d-flex flex-column align-items-center py-5">
+          <i class="pi pi-inbox text-4xl text-muted mb-3"></i>
+          <span class="text-muted">Kayıt bulunamadı.</span>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

@@ -1,24 +1,38 @@
-<div class="home-container">
-  <div class="title-section">
-    <h3>Öğrenciler</h3>
+<div class="admin-wrapper">
+  <div class="admin-card">
+    <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+      <h4 class="fw-bold mb-0" style="color: #dc2134;">Öğrenciler</h4>
+
+      <button
+        pButton
+        class="p-button-sm"
+        icon="pi pi-plus"
+        label="Öğrenci Ekle"
+        (click)="openAddDialog()"
+      ></button>
+    </div>
+
+    <div class="small text-muted mb-3">
+      Öğrenci listesini buradan görüntüleyebilir ve yeni kayıt ekleyebilirsiniz.
+    </div>
+
+    @if (isLoading) {
+      <div class="loading-box">
+        <p-progressSpinner strokeWidth="4" fill="transparent" animationDuration=".8s"></p-progressSpinner>
+        <span class="loading-text">Yükleniyor...</span>
+      </div>
+    }
+
+    @if (errorMessage) {
+      <div class="error-box">
+        <p>{{ errorMessage }}</p>
+      </div>
+    }
+
+    @if (!isLoading && !errorMessage) {
+      <app-person-table [persons]="persons" [loading]="isLoading"></app-person-table>
+    }
   </div>
-
-  @if (isLoading) {
-    <div class="loading-box">
-      <p>Bekle...</p>
-    </div>
-  }
-
-  @if (errorMessage) {
-    <div class="error-box">
-      <p>{{ errorMessage }}</p>
-    </div>
-  }
-
-  @if (!isLoading && !errorMessage) {
-    <button (click)="openAddDialog()">Öğrenci Ekle</button>
-    <app-person-table [persons]="persons"></app-person-table>
-  }
 </div>
 
 <app-person-form
