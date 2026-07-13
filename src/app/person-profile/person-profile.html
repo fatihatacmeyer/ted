@@ -1,0 +1,68 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '500px' }"
+  [draggable]="false"
+  (onHide)="close()"
+  header="Kişisel Profil"
+  [baseZIndex]="10000"
+>
+  @if (person) {
+    <div class="profile-content">
+      <div class="profile-info">
+        <div class="info-row">
+          <span class="info-label">Ad Soyad</span>
+          <span class="info-value">{{ person.adsoyad }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Sicil No</span>
+          <span class="info-value">{{ person.sicilno || '-' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Telefon</span>
+          <span class="info-value">{{ person.ceptelefon || '-' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Kayıt Tipi</span>
+          <span class="info-value">{{ person.userdefad || '-' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Kart ID</span>
+          <span class="info-value">{{ person.cardid || '-' }}</span>
+        </div>
+      </div>
+
+      <div class="linked-section">
+        <h6>{{ linkedPersonsLabel }}</h6>
+        @if (hasLinkedPersons) {
+          <ul class="linked-list">
+            @for (linked of linkedPersons; track linked.id) {
+              <li>
+                <button
+                  pButton
+                  type="button"
+                  label="{{ linked.name }} ({{ linked.sicilno || '-' }})"
+                  class="p-button-text p-button-sm p-button-link"
+                  (click)="onLinkedPersonClick(linked)"
+                ></button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <span class="no-linked">Atanmamış</span>
+        }
+      </div>
+
+      <div class="profile-actions">
+        <button
+          pButton
+          type="button"
+          label="Düzenle"
+          class="p-button-outlined"
+          icon="pi pi-pencil"
+          (click)="onEditClick()"
+        ></button>
+      </div>
+    </div>
+  }
+</p-dialog>

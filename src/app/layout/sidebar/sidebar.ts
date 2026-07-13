@@ -20,10 +20,10 @@ export class SidebarComponent {
   @Output() sidebarToggle = new EventEmitter<void>();
 
   protected readonly navItems: NavItem[] = [
-    { label: 'Anasayfa', route: '/home/anasayfa', icon: 'dashboard' },
+    { label: 'Anasayfa', route: '/home', icon: 'dashboard' },
     { label: 'Öğrenciler', route: '/home/students', icon: 'school' },
     { label: 'Öğretmenler', route: '/home/teachers', icon: 'badge' },
     { label: 'Veliler', route: '/home/parents', icon: 'group' },
-    { label: 'Servis', route: '/home/bus', icon: 'directions_bus' },
+    { label: 'Servis', route: '/home/transport', icon: 'directions_bus' },
   ];
 }

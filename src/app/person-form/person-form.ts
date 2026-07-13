@@ -8,8 +8,9 @@ import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { TooltipModule } from 'primeng/tooltip';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { PersonService } from '../services/person.service';
-import { Person, OperationResultResponse } from '../core/person.model';
+import { Person, OperationResultResponse, parseLinkedIds, serializeLinkedIds } from '../core/person.model';
 
 @Component({
   selector: 'app-person-form',
@@ -24,6 +25,7 @@ import { Person, OperationResultResponse } from '../core/person.model';
     DatePickerModule,
     SelectModule,
     TooltipModule,
+    MultiSelectModule,
   ],
   templateUrl: './person-form.html',
   styleUrl: './person-form.scss',
@@ -33,6 +35,8 @@ export class PersonFormComponent implements OnChanges {
   @Input({ required: true }) userdef!: number;
   @Input() title = 'Yeni Kayıt Ekle';
   @Input() editPerson: Person | null = null;
+  @Input() allPersons: Person[] = [];
+  @Input() linkedPersonIds: number[] = [];
 
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() saved = new EventEmitter<void>();
@@ -71,6 +75,7 @@ export class PersonFormComponent implements OnChanges {
     direktorluk: [''],
     yaka: [''],
     giristarih: [null as Date | null],
+    linkedPersons: [[] as number[]],
   });
   isSaving = false;
   errorMessage = '';
@@ -130,6 +135,9 @@ export class PersonFormComponent implements OnChanges {
       yaka: p.yakaad || '',
       giristarih: null,
     });
+    // linkedPersons'ı parseLinkedIds ile doldur
+    const linkedIds = parseLinkedIds(p.firma);
+    this.form.patchValue({ linkedPersons: linkedIds });
   }
 
   /** Backend'den gelen 'YYYY-MM-DD' string'ini Date objesine çevirir. */
@@ -149,6 +157,7 @@ export class PersonFormComponent implements OnChanges {
     this.selectedPhoto = null;
     this.photoFileName = '';
     this.form.reset();
+    this.form.patchValue({ linkedPersons: [] });
   }
 
   onPhotoSelected(event: Event): void {
@@ -176,6 +185,22 @@ export class PersonFormComponent implements OnChanges {
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  get linkedPersonOptions(): { label: string; value: number }[] {
+    // userdef=11 → show userdef=13 (parents), userdef=13 → show userdef=11 (children)
+    const targetUserdef = this.userdef === 11 ? 13 : 11;
+    return this.allPersons
+      .filter(p => p.userdef === targetUserdef)
+      .map(p => ({ label: `${p.adsoyad} (${p.sicilno})`, value: p.id }));
+  }
+
+  get showLinkedPersons(): boolean {
+    return this.userdef === 11 || this.userdef === 13;
+  }
+
+  get linkedPersonsLabel(): string {
+    return this.userdef === 11 ? 'Veliler' : 'Çocuklar';
   }
 
   submit(): void {
@@ -206,7 +231,7 @@ export class PersonFormComponent implements OnChanges {
       ilce: v.ilce || '',
       // Düzenleme modunda: orijinal Person'dan gelen ID'leri kullan
       // (form text gösterir ama backend ID bekler — AngelWeb de ID gönderir)
-      firma: this.isEditMode ? (this.editPerson?.firma ?? '') : (v.firma || ''),
+      firma: serializeLinkedIds(v.linkedPersons || []),
       bolum: this.isEditMode ? (this.editPerson?.bolum ?? '') : (v.bolum || ''),
       pozisyon: this.isEditMode ? (this.editPerson?.pozisyon ?? '') : (v.pozisyon || ''),
       gorev: this.isEditMode ? (this.editPerson?.gorev ?? '') : (v.gorev || ''),

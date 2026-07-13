@@ -127,3 +127,29 @@ export interface ExitReason {
   id: number;
   [key: string]: unknown;
 }
+
+export interface LinkedPerson {
+  id: number;
+  name: string;
+  sicilno?: string;
+}
+
+export function parseLinkedIds(raw: string | null | undefined): number[] {
+  if (!raw || raw.trim() === '' || raw === '- - - - - - -') return [];
+  return raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+}
+
+export function serializeLinkedIds(ids: number[]): string {
+  return ids.filter(n => !isNaN(n)).join(',');
+}
+
+export function resolveLinkedNames(ids: number[], allPersons: Person[]): LinkedPerson[] {
+  return ids.map(id => {
+    const found = allPersons.find(p => p.id === id);
+    return {
+      id,
+      name: found ? found.adsoyad : `Bilinmeyen (#${id})`,
+      sicilno: found?.sicilno ?? '',
+    };
+  });
+}

@@ -67,6 +67,8 @@
             <span class="cell-text">{{ getFieldValue(person, col.field) ?? '-' }}</span>
           } @else if (col.field === 'indirimorani') {
             <span class="metric-badge">{{ getFieldValue(person, col.field) }}%</span>
+          } @else if (col.field === 'firma') {
+            <span class="cell-text">{{ getLinkedDisplay(person) }}</span>
           } @else {
             <span class="cell-text">{{ getFieldValue(person, col.field) }}</span>
           }

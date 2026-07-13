@@ -37,7 +37,7 @@
         <a
           [routerLink]="item.route"
           routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: false }"
+          [routerLinkActiveOptions]="{ exact: item.route === '/home' }"
           [title]="!isOpen ? item.label : ''"
         >
           <span class="material-symbols-outlined">{{ item.icon }}</span>

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Person } from '../../core/person.model';
+import { Person, parseLinkedIds, resolveLinkedNames } from '../../core/person.model';
 import { TableModule } from 'primeng/table';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { InputTextModule } from 'primeng/inputtext';
@@ -41,6 +41,8 @@ export class PersonTableComponent implements OnInit {
   @Input() title = '';
   @Input() loading = false;
   @Input() tableId = 'default';
+  @Input() columnOverrides: { field: string; header: string }[] = [];
+  @Input() allPersons: Person[] = [];
   @Output() rowClick = new EventEmitter<Person>();
   @Output() terminateRequest = new EventEmitter<Person>();
   @Output() restoreRequest = new EventEmitter<Person>();
@@ -49,6 +51,7 @@ export class PersonTableComponent implements OnInit {
     { field: 'ad', header: 'Ad', sortable: true, filterable: true },
     { field: 'soyad', header: 'Soyad', sortable: true, filterable: true },
     { field: 'sicilno', header: 'Sicil No', sortable: true, filterable: true },
+    { field: 'firma', header: 'Firma', sortable: true },
     { field: 'firmaad', header: 'Firma', sortable: true },
     { field: 'bolumad', header: 'Bölüm', sortable: true },
     { field: 'pozisyonad', header: 'Pozisyon', sortable: true },
@@ -78,7 +81,7 @@ export class PersonTableComponent implements OnInit {
   private readonly alwaysVisible = ['ad', 'soyad'];
 
   private readonly defaultFields = [
-    'ad', 'soyad', 'sicilno', 'firmaad', 'bolumad', 'pozisyonad', 'ceptelefon',
+    'ad', 'soyad', 'sicilno', 'firma', 'firmaad', 'bolumad', 'pozisyonad', 'ceptelefon',
   ];
 
   selectedColumnFields: string[] = [];
@@ -91,6 +94,7 @@ export class PersonTableComponent implements OnInit {
 
   ngOnInit(): void {
     this.selectedColumnFields = this.loadFromStorage();
+    this.applyColumnOverrides();
   }
 
   get globalFilterFields(): string[] {
@@ -103,6 +107,23 @@ export class PersonTableComponent implements OnInit {
 
   getFieldValue(person: Person, field: string): string | number | boolean | null {
     return (person as unknown as Record<string, string | number | boolean | null>)[field] ?? null;
+  }
+
+  getLinkedDisplay(person: Person): string {
+    const ids = parseLinkedIds(person.firma);
+    if (ids.length === 0) return '-';
+    if (!this.allPersons.length) return person.firma ?? '-';
+    const linked = resolveLinkedNames(ids, this.allPersons);
+    return linked.map(l => l.name).join(', ');
+  }
+
+  private applyColumnOverrides(): void {
+    for (const override of this.columnOverrides) {
+      const col = this.allColumns.find(c => c.field === override.field);
+      if (col) {
+        col.header = override.header;
+      }
+    }
   }
 
   /** Multiselect değiştiğinde çağrılır — her zaman görünür sütunları korur + localStorage'a kaydeder */

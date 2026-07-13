@@ -11,7 +11,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     loadComponent: () => import('./layout/layout').then((m) => m.LayoutComponent),
     children: [
-      { path: '', redirectTo: 'anasayfa', pathMatch: 'full' },
+      //{ path: '', redirectTo: 'anasayfa', pathMatch: 'full' },
       {
         path: '',
         loadComponent: () => import('./dashboard/dashboard').then((m) => m.DashboardComponent),
