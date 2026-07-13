@@ -3,12 +3,13 @@ import { PersonService } from '../services/person.service';
 import { Person } from '../core/person.model';
 import { PersonTableComponent } from '../shared/person-table/person-table';
 import { PersonFormComponent } from '../person-form/person-form';
+import { PersonExitDialogComponent } from '../person-exit-dialog/person-exit-dialog';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 @Component({
   selector: 'app-parents',
   standalone: true,
-  imports: [PersonTableComponent, PersonFormComponent, ButtonModule, ProgressSpinnerModule],
+  imports: [PersonTableComponent, PersonFormComponent, PersonExitDialogComponent, ButtonModule, ProgressSpinnerModule],
   templateUrl: './parents.html',
   styleUrl: './parents.scss',
 })
@@ -21,6 +22,9 @@ export class ParentsComponent implements OnInit {
   errorMessage: string = '';
   showAddDialog = false;
   editPerson: Person | null = null;
+  showExitDialog = false;
+  exitPerson: Person | null = null;
+  exitMode: 'exit' | 'restore' = 'exit';
 
   constructor(
     private personService: PersonService,
@@ -66,6 +70,27 @@ export class ParentsComponent implements OnInit {
 
   onPersonSaved(): void {
     this.editPerson = null;
+    this.fetchPersonList();
+  }
+
+  onTerminateRequest(person: Person): void {
+    this.exitPerson = person;
+    this.exitMode = 'exit';
+    this.showExitDialog = true;
+  }
+
+  onRestoreRequest(person: Person): void {
+    this.exitPerson = person;
+    this.exitMode = 'restore';
+    this.showExitDialog = true;
+  }
+
+  onExitDialogClose(): void {
+    this.exitPerson = null;
+  }
+
+  onExitConfirmed(): void {
+    this.exitPerson = null;
     this.fetchPersonList();
   }
 }

@@ -5,11 +5,18 @@ import { PersonTableComponent } from '../shared/person-table/person-table';
 import { PersonFormComponent } from '../person-form/person-form';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { PersonExitDialogComponent } from '../person-exit-dialog/person-exit-dialog';
 
 @Component({
   selector: 'app-teachers',
   standalone: true,
-  imports: [PersonTableComponent, PersonFormComponent, ButtonModule, ProgressSpinnerModule],
+  imports: [
+    PersonTableComponent,
+    PersonFormComponent,
+    PersonExitDialogComponent,
+    ButtonModule,
+    ProgressSpinnerModule,
+  ],
   templateUrl: './teachers.html',
   styleUrl: './teachers.scss',
 })
@@ -22,6 +29,9 @@ export class TeachersComponent implements OnInit {
   errorMessage: string = '';
   showAddDialog = false;
   editPerson: Person | null = null;
+  showExitDialog = false;
+  exitPerson: Person | null = null;
+  exitMode: 'exit' | 'restore' = 'exit';
 
   constructor(
     private personService: PersonService,
@@ -67,6 +77,27 @@ export class TeachersComponent implements OnInit {
 
   onPersonSaved(): void {
     this.editPerson = null;
+    this.fetchPersonList();
+  }
+
+  onTerminateRequest(person: Person): void {
+    this.exitPerson = person;
+    this.exitMode = 'exit';
+    this.showExitDialog = true;
+  }
+
+  onRestoreRequest(person: Person): void {
+    this.exitPerson = person;
+    this.exitMode = 'restore';
+    this.showExitDialog = true;
+  }
+
+  onExitDialogClose(): void {
+    this.exitPerson = null;
+  }
+
+  onExitConfirmed(): void {
+    this.exitPerson = null;
     this.fetchPersonList();
   }
 }

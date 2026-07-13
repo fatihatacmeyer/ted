@@ -9,6 +9,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { TooltipModule } from 'primeng/tooltip';
+import { ButtonModule } from 'primeng/button';
 
 export interface ColumnDef {
   field: string;
@@ -30,6 +31,7 @@ export interface ColumnDef {
     IconFieldModule,
     InputIconModule,
     TooltipModule,
+    ButtonModule,
   ],
   templateUrl: './person-table.html',
   styleUrl: './person-table.scss',
@@ -39,6 +41,8 @@ export class PersonTableComponent {
   @Input() title: string = '';
   @Input() loading: boolean = false;
   @Output() rowClick = new EventEmitter<Person>();
+  @Output() terminateRequest = new EventEmitter<Person>();
+  @Output() restoreRequest = new EventEmitter<Person>();
 
   allColumns: ColumnDef[] = [
     { field: 'ad', header: 'Ad', sortable: true, filterable: true },

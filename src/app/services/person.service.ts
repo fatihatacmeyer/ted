@@ -61,7 +61,7 @@ export class PersonService {
       sicilgroup: '',
       cardid: '',
       userdef: '',
-      aktif: 1,
+      aktif: 1, // sadece aktif siciller, 0 yaparsan pasiflerle beraber tüm liste gelir
       okod1: '',
       okod2: '',
       okod3: '',
@@ -323,5 +323,48 @@ export class PersonService {
     const headers = this.buildAuthHeaders();
 
     return this.http.get<any>(apiUrl, { headers });
+  }
+
+  restorePerson(sicilId: number, girisTarihi: string): Observable<any> {
+    const paramString = this.buildParamString({
+      islemtipi: 'c',
+      point: 'sicil',
+      sicilid: sicilId,
+      neden: 0,
+      cikistarih: girisTarihi,
+      type: 'donus',
+    });
+
+    console.log('🔍 [restorePerson] RAW paramString:', paramString);
+
+    const encryptedParam = this.prepareService.prepare(paramString);
+    const apiUrl = `${this.config.apiUrl}/Dynamic?Name=${encodeURIComponent(encryptedParam)}`;
+    const headers = this.buildAuthHeaders();
+
+    return this.http.get<any>(apiUrl, { headers });
+  }
+
+  getAyrilisNedenleri(): Observable<any[]> {
+    const paramString = this.buildParamString({
+      kaynak: 'access',
+      point: 'gridcbo',
+      islemtipi: 's',
+      id: 0,
+    });
+
+    const encryptedParam = this.prepareService.prepare(paramString);
+    const apiUrl = `${this.config.apiUrl}/Dynamic?Name=${encodeURIComponent(encryptedParam)}`;
+    const headers = this.buildAuthHeaders();
+
+    return new Observable<any[]>((observer) => {
+      this.http.get<any>(apiUrl, { headers }).subscribe({
+        next: (data: any) => {
+          console.log('🔍 [getAyrilisNedenleri] RAW response items:', data.length);
+          observer.next(data);
+          observer.complete();
+        },
+        error: (err) => observer.error(err),
+      });
+    });
   }
 }

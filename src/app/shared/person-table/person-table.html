@@ -52,6 +52,7 @@
           <th [ngClass]="'col-' + col.field">{{ col.header }}</th>
         }
       }
+      <th class="col-actions">İşlem</th>
     </tr>
   </ng-template>
 
@@ -68,6 +69,27 @@
           }
         </td>
       }
+      <td class="col-actions">
+        @if (!person.cikistarih) {
+          <button
+            pButton
+            icon="pi pi-times"
+            class="p-button-danger p-button-text p-button-sm"
+            pTooltip="Çıkış Ver"
+            tooltipPosition="top"
+            (click)="terminateRequest.emit(person); $event.stopPropagation()"
+          ></button>
+        } @else {
+          <button
+            pButton
+            icon="pi pi-replay"
+            class="p-button-success p-button-text p-button-sm"
+            pTooltip="İşe Geri Al"
+            tooltipPosition="top"
+            (click)="restoreRequest.emit(person); $event.stopPropagation()"
+          ></button>
+        }
+      </td>
     </tr>
   </ng-template>
 

@@ -30,7 +30,13 @@
     }
 
     @if (!isLoading && !errorMessage) {
-      <app-person-table [persons]="persons" [loading]="isLoading" (rowClick)="onRowClick($event)"></app-person-table>
+      <app-person-table
+        [persons]="persons"
+        [loading]="isLoading"
+        (rowClick)="onRowClick($event)"
+        (terminateRequest)="onTerminateRequest($event)"
+        (restoreRequest)="onRestoreRequest($event)"
+      ></app-person-table>
     }
   </div>
 </div>
@@ -43,3 +49,11 @@
   (visibleChange)="onEditDialogClose()"
   (saved)="onPersonSaved()"
 ></app-person-form>
+
+<app-person-exit-dialog
+  [(visible)]="showExitDialog"
+  [person]="exitPerson"
+  [mode]="exitMode"
+  (visibleChange)="onExitDialogClose()"
+  (confirmed)="onExitConfirmed()"
+></app-person-exit-dialog>
