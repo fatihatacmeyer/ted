@@ -20,6 +20,7 @@ export class ParentsComponent implements OnInit {
   isLoading: boolean = false;
   errorMessage: string = '';
   showAddDialog = false;
+  editPerson: Person | null = null;
 
   constructor(
     private personService: PersonService,
@@ -50,10 +51,21 @@ export class ParentsComponent implements OnInit {
   }
 
   openAddDialog(): void {
+    this.editPerson = null;
     this.showAddDialog = true;
   }
 
+  onRowClick(person: Person): void {
+    this.editPerson = person;
+    this.showAddDialog = true;
+  }
+
+  onEditDialogClose(): void {
+    this.editPerson = null;
+  }
+
   onPersonSaved(): void {
+    this.editPerson = null;
     this.fetchPersonList();
   }
 }

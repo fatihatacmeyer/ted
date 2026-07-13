@@ -255,7 +255,7 @@
       <button
         pButton
         type="submit"
-        [label]="isSaving ? 'Kaydediliyor...' : 'Kaydet'"
+        [label]="isSaving ? 'Kaydediliyor...' : (isEditMode ? 'Güncelle' : 'Kaydet')"
         [disabled]="isSaving"
         icon="pi pi-check"
       ></button>

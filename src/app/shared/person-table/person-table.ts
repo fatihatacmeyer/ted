@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Person } from '../../core/person.model';
 import { TableModule } from 'primeng/table';
@@ -38,6 +38,7 @@ export class PersonTableComponent {
   @Input() persons: Person[] = [];
   @Input() title: string = '';
   @Input() loading: boolean = false;
+  @Output() rowClick = new EventEmitter<Person>();
 
   allColumns: ColumnDef[] = [
     { field: 'ad', header: 'Ad', sortable: true, filterable: true },

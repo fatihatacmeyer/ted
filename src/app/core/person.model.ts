@@ -6,13 +6,24 @@ export interface Person {
   sicilno: string;
   personelno: string;
   userid: string;
-  firmaad: string;
-  bolumad: string;
-  pozisyonad: string;
-  altfirmaad: string;
-  direktorlukad: string;
-  gorevad: string;
-  yakaad: string;
+
+  // Referans alanları — API hem ID hem text döndürebilir
+  firma?: string;       // Firma ID (backend'e update'te ID olarak gönderilir)
+  firmaad: string;      // Firma adı (görünen metin)
+  bolum?: string;       // Bölüm ID
+  bolumad: string;      // Bölüm adı
+  pozisyon?: string;    // Pozisyon ID
+  pozisyonad: string;   // Pozisyon adı
+  altfirma?: string;    // Alt firma ID
+  altfirmaad: string;   // Alt firma adı
+  direktorluk?: string; // Directorate ID
+  direktorlukad: string;// Directorate adı
+  gorev?: string;       // Görev ID
+  gorevad: string;      // Görev adı
+  yaka?: string;        // Yaka ID
+  yakaad: string;       // Yaka adı
+
+  // Ek alanlar
   credit: number;
   indirimorani: number;
   ceptelefon: string;

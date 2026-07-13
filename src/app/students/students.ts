@@ -20,6 +20,7 @@ export class StudentsComponent implements OnInit {
   isLoading: boolean = false;
   errorMessage: string = '';
   showAddDialog = false;
+  editPerson: Person | null = null;
 
   constructor(
     private personService: PersonService,
@@ -36,6 +37,11 @@ export class StudentsComponent implements OnInit {
 
     this.personService.getPersonList().subscribe({
       next: (data: Person[]) => {
+        // API'nin döndüğü tüm alanları görelim (firma ID'leri geliyor mu?)
+        if (data.length > 0) {
+          console.log('🔍 [PersonList] First item RAW fields:', JSON.stringify(Object.keys(data[0])));
+          console.log('🔍 [PersonList] First item ALL data:', JSON.stringify(data[0]));
+        }
         this.persons = data.filter((p) => p.userdef === this.USERDEF);
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -50,10 +56,21 @@ export class StudentsComponent implements OnInit {
   }
 
   openAddDialog(): void {
+    this.editPerson = null;
     this.showAddDialog = true;
   }
 
+  onRowClick(person: Person): void {
+    this.editPerson = person;
+    this.showAddDialog = true;
+  }
+
+  onEditDialogClose(): void {
+    this.editPerson = null;
+  }
+
   onPersonSaved(): void {
+    this.editPerson = null;
     this.fetchPersonList();
   }
 }

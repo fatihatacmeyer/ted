@@ -56,7 +56,7 @@
   </ng-template>
 
   <ng-template pTemplate="body" let-person>
-    <tr>
+    <tr (click)="rowClick.emit(person)" style="cursor: pointer;">
       @for (col of getVisibleColumns(); track col.field) {
         <td [ngClass]="'col-' + col.field">
           @if (col.field === 'cikistarih') {

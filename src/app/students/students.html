@@ -30,7 +30,7 @@
     }
 
     @if (!isLoading && !errorMessage) {
-      <app-person-table [persons]="persons" [loading]="isLoading"></app-person-table>
+      <app-person-table [persons]="persons" [loading]="isLoading" (rowClick)="onRowClick($event)"></app-person-table>
     }
   </div>
 </div>
@@ -38,6 +38,8 @@
 <app-person-form
   [(visible)]="showAddDialog"
   [userdef]="USERDEF"
-  title="Yeni Öğrenci Ekle"
+  [editPerson]="editPerson"
+  [title]="editPerson ? 'Öğrenci Düzenle' : 'Yeni Öğrenci Ekle'"
+  (visibleChange)="onEditDialogClose()"
   (saved)="onPersonSaved()"
 ></app-person-form>
