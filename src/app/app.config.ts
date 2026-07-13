@@ -16,6 +16,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideAnimationsAsync(),
     providePrimeNG({
+      translation: PRIME_NG_TR,
       theme: {
         preset: MyPreset,
         options: {

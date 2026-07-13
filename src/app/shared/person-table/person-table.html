@@ -16,13 +16,16 @@
   <p-multiselect
     [options]="allColumns"
     [(ngModel)]="selectedColumnFields"
+    (ngModelChange)="onColumnsChanged()"
+    (onClear)="onClearColumns()"
     optionLabel="header"
     optionValue="field"
     placeholder="Sütun Seç"
     display="chip"
     [style]="{ minWidth: '220px' }"
     [showHeader]="true"
-    [showClear]="true"
+    [showClear]="false"
+    [maxSelectedLabels]="3"
   />
 </div>
 

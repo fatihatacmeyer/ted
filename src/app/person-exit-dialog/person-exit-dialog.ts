@@ -45,7 +45,7 @@ export class PersonExitDialogComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['visible'] && this.visible) {
       this.errorMessage = '';
-      this.selectedDate = null;
+      this.selectedDate = new Date();
       this.selectedNeden = null;
 
       if (this.mode === 'exit') {
@@ -65,7 +65,7 @@ export class PersonExitDialogComponent implements OnChanges {
 
   get isFormValid(): boolean {
     if (!this.selectedDate) return false;
-    if (this.mode === 'exit' && !this.selectedNeden) return false;
+    if (this.mode === 'exit' && (this.selectedNeden === null || this.selectedNeden === undefined)) return false;
     return true;
   }
 

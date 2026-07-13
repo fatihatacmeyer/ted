@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Person } from '../../core/person.model';
 import { TableModule } from 'primeng/table';
@@ -36,10 +36,11 @@ export interface ColumnDef {
   templateUrl: './person-table.html',
   styleUrl: './person-table.scss',
 })
-export class PersonTableComponent {
+export class PersonTableComponent implements OnInit {
   @Input() persons: Person[] = [];
   @Input() title: string = '';
   @Input() loading: boolean = false;
+  @Input() tableId: string = 'default';
   @Output() rowClick = new EventEmitter<Person>();
   @Output() terminateRequest = new EventEmitter<Person>();
   @Output() restoreRequest = new EventEmitter<Person>();
@@ -73,13 +74,24 @@ export class PersonTableComponent {
     { field: 'yetkistrad', header: 'Yetki Str Adı' },
   ];
 
+  /** Her zaman görünür olan sütunlar — kaldırılamaz */
+  private readonly alwaysVisible = ['ad', 'soyad'];
+
   private readonly defaultFields = [
     'ad', 'soyad', 'sicilno', 'firmaad', 'bolumad', 'pozisyonad', 'ceptelefon',
   ];
 
-  selectedColumnFields: string[] = [...this.defaultFields];
+  selectedColumnFields: string[] = [];
 
   filterText = '';
+
+  private get storageKey(): string {
+    return `ted_table_columns_${this.tableId}`;
+  }
+
+  ngOnInit(): void {
+    this.selectedColumnFields = this.loadFromStorage();
+  }
 
   get globalFilterFields(): string[] {
     return this.allColumns.map(col => col.field);
@@ -91,5 +103,45 @@ export class PersonTableComponent {
 
   getFieldValue(person: Person, field: string): any {
     return (person as Record<string, any>)[field];
+  }
+
+  /** Multiselect değiştiğinde çağrılır — her zaman görünür sütunları korur + localStorage'a kaydeder */
+  onColumnsChanged(): void {
+    // Her zaman görünür sütunları zorla ekle
+    for (const field of this.alwaysVisible) {
+      if (!this.selectedColumnFields.includes(field)) {
+        this.selectedColumnFields.push(field);
+      }
+    }
+    this.saveToStorage();
+  }
+
+  /** X tuşuna basıldığında — varsayılan sütunlara dön */
+  onClearColumns(): void {
+    this.selectedColumnFields = [...this.defaultFields];
+    this.saveToStorage();
+  }
+
+  private loadFromStorage(): string[] {
+    try {
+      const raw = localStorage.getItem(this.storageKey);
+      if (raw) {
+        const parsed: string[] = JSON.parse(raw);
+        // Depolanan değerler hâlâ allColumns'ta var mı filtrele + alwaysVisible'ı ekle
+        const validFields = this.allColumns.map(c => c.field);
+        const filtered = parsed.filter(f => validFields.includes(f));
+        for (const field of this.alwaysVisible) {
+          if (!filtered.includes(field)) filtered.push(field);
+        }
+        return filtered;
+      }
+    } catch { /* localStorage bozuksa default'a dön */ }
+    return [...this.defaultFields];
+  }
+
+  private saveToStorage(): void {
+    try {
+      localStorage.setItem(this.storageKey, JSON.stringify(this.selectedColumnFields));
+    } catch { /* localStorage doluysa sessizce geç */ }
   }
 }

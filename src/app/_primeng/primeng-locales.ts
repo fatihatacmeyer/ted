@@ -28,6 +28,11 @@ export const PRIME_NG_TR = {
   completed: 'Tamamlandı',
   pending: 'Beklemede',
 
+  // Multiselect
+  selectionMessage: '{0} sütun seçili',
+  emptyMessage: 'Sonuç bulunamadı',
+  emptyFilterMessage: 'Sonuç bulunamadı',
+
   // 📌 DATEPICKER İÇİN KRİTİK ALANLAR
   dayNames: ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'],
   dayNamesShort: ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cts'],

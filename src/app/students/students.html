@@ -33,6 +33,7 @@
       <app-person-table
         [persons]="persons"
         [loading]="isLoading"
+        [tableId]="'students'"
         (rowClick)="onRowClick($event)"
         (terminateRequest)="onTerminateRequest($event)"
         (restoreRequest)="onRestoreRequest($event)"
