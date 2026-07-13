@@ -172,8 +172,6 @@ export class PersonService {
     };
 
     const headers = this.buildAuthHeaders();
-
-    // Log the exact request body for comparison with AngelWeb
     console.log('🔍 [insertPerson] payload:', JSON.stringify(payload));
 
     return this.http.post<any>(apiUrl, payload, { headers });
@@ -252,7 +250,6 @@ export class PersonService {
       eksikfmas: 0,
     });
 
-    //AngelWeb karşılaştırması için şifrelenmemiş param'ı logla
     console.log('🔍 [updatePerson] RAW paramString:', paramString);
 
     const encryptedParam = this.prepareService.prepare(paramString);
@@ -301,7 +298,6 @@ export class PersonService {
   }
 
   terminatePerson(sicilIds: number[], nedenId: number, cikisTarihi: string): Observable<any> {
-    // Backend'in beklediği format: Tek ID ise "148", çoklu ise "148#149#150"
     const sicilIdString = sicilIds.join('#');
 
     const paramString = this.buildParamString({
@@ -315,10 +311,8 @@ export class PersonService {
 
     console.log('🔍 [terminatePerson] RAW paramString:', paramString);
 
-    // Şifreleme işlemi
     const encryptedParam = this.prepareService.prepare(paramString);
 
-    // HTTP GET isteği için URL'in oluşturulması
     const apiUrl = `${this.config.apiUrl}/Dynamic?Name=${encodeURIComponent(encryptedParam)}`;
     const headers = this.buildAuthHeaders();
 

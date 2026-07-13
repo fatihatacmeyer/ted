@@ -1,4 +1,12 @@
-import { Component, ChangeDetectorRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  ChangeDetectorRef,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
@@ -29,20 +37,22 @@ export class PersonExitDialogComponent implements OnChanges {
   isProcessing = false;
   errorMessage = '';
 
-  constructor(private personService: PersonService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private personService: PersonService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['visible'] && this.visible) {
       this.errorMessage = '';
       this.selectedDate = null;
       this.selectedNeden = null;
-      
+
       if (this.mode === 'exit') {
         this.displayTitle = 'Kişiyi İşten Çıkar';
         this.loadNedenler();
       } else {
         this.displayTitle = 'Kişiyi İşe Geri Al';
-        // Set default date to today
         this.selectedDate = new Date();
       }
     }
@@ -89,38 +99,33 @@ export class PersonExitDialogComponent implements OnChanges {
 
   onConfirm(): void {
     if (!this.person || !this.selectedDate || !this.isFormValid) return;
-    
+
     this.isProcessing = true;
     this.errorMessage = '';
-    
+
     const formattedDate = this.formatDate(this.selectedDate);
-    
+
     if (this.mode === 'exit') {
-      this.personService.terminatePerson(
-        [this.person.id],
-        this.selectedNeden.value,
-        formattedDate
-      ).subscribe({
-        next: (response: any) => {
-          this.isProcessing = false;
-          const result = Array.isArray(response) ? response[0] : response;
-          if (result?.islemsonuc == '1' || result?.islemsonuc == 1) {
-            this.confirmed.emit();
-            this.close();
-          } else {
-            this.errorMessage = 'İşlem başarısız oldu. Lütfen tekrar deneyin.';
-          }
-        },
-        error: (err: any) => {
-          this.isProcessing = false;
-          this.errorMessage = 'Bir hata oluştu: ' + (err.message || 'Bilinmeyen hata');
-        },
-      });
+      this.personService
+        .terminatePerson([this.person.id], this.selectedNeden.value, formattedDate)
+        .subscribe({
+          next: (response: any) => {
+            this.isProcessing = false;
+            const result = Array.isArray(response) ? response[0] : response;
+            if (result?.islemsonuc == '1' || result?.islemsonuc == 1) {
+              this.confirmed.emit();
+              this.close();
+            } else {
+              this.errorMessage = 'İşlem başarısız oldu. Lütfen tekrar deneyin.';
+            }
+          },
+          error: (err: any) => {
+            this.isProcessing = false;
+            this.errorMessage = 'Bir hata oluştu: ' + (err.message || 'Bilinmeyen hata');
+          },
+        });
     } else {
-      this.personService.restorePerson(
-        this.person.id,
-        formattedDate
-      ).subscribe({
+      this.personService.restorePerson(this.person.id, formattedDate).subscribe({
         next: (response: any) => {
           this.isProcessing = false;
           const result = Array.isArray(response) ? response[0] : response;
