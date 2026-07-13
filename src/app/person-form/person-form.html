@@ -19,6 +19,7 @@
             type="button"
             icon="pi pi-times"
             class="p-button-danger p-button-rounded p-button-sm remove-photo"
+            aria-label="Fotoğrafı kaldır"
             (click)="removePhoto()"
             pTooltip="Fotoğrafı kaldır"
             tooltipPosition="top"
@@ -79,7 +80,7 @@
             <p-select
               id="cinsiyet"
               formControlName="cinsiyet"
-              [options]="cinsiyetOptions"
+              [options]="genderOptions"
               optionLabel="label"
               optionValue="value"
               placeholder="Seçiniz"
@@ -91,7 +92,7 @@
             <p-select
               id="kangrubu"
               formControlName="kangrubu"
-              [options]="kangrubuOptions"
+              [options]="bloodTypeOptions"
               optionLabel="label"
               optionValue="value"
               placeholder="Seçiniz"
@@ -251,13 +252,14 @@
     }
 
     <div class="actions">
-      <button pButton type="button" label="Vazgeç" class="p-button-text" (click)="close()"></button>
+      <button pButton type="button" label="Vazgeç" class="p-button-text" aria-label="Vazgeç" (click)="close()"></button>
       <button
         pButton
         type="submit"
         [label]="isSaving ? 'Kaydediliyor...' : (isEditMode ? 'Güncelle' : 'Kaydet')"
         [disabled]="isSaving"
         icon="pi pi-check"
+        aria-label="Kaydet"
       ></button>
     </div>
   </form>

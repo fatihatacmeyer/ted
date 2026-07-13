@@ -88,8 +88,42 @@ export interface PersonInsertRequest {
 }
 
 /** Backend'in Person/Login gibi endpoint'lerden döndüğü ortak sonuç formatı. */
-export interface IslemSonucResponse {
+export interface OperationResultResponse {
   islemsonuc: number | string;
   islemno?: string;
   sunucucevap?: string | null;
+}
+
+/**
+ * Login sonrası dönen kullanıcı modeli.
+ * Backend hem Person alanlarını hem de auth alanlarını (tokenid, islemno vb.) döner.
+ */
+export interface User {
+  id: number | null;
+  customerCode: string;
+  fullname: string;
+  username: string;
+  loginname: string;
+  gorev: string | null;
+  yetki: number | null;
+  bolum: string | null;
+  kademe: string | null;
+  xsicilid: number | null;
+  extloginname: string;
+  customerName: string;
+  tokenid: string;
+  islemno: string;
+  access: string;
+  accessmenu: boolean;
+  admin: boolean;
+  islemsonuc: number | string;
+  [key: string]: unknown; // Backend'in döndüğü ek alanlar için open-ended
+}
+
+/** Ayrılış nedeni dropdown seçeneği */
+export interface ExitReason {
+  tip: string;
+  ad: string;
+  id: number;
+  [key: string]: unknown;
 }

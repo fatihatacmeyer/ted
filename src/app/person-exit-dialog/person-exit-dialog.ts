@@ -6,6 +6,7 @@ import {
   OnChanges,
   Output,
   SimpleChanges,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,7 +14,7 @@ import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
-import { Person } from '../core/person.model';
+import { Person, ExitReason, OperationResultResponse } from '../core/person.model';
 import { PersonService } from '../services/person.service';
 
 @Component({
@@ -30,27 +31,25 @@ export class PersonExitDialogComponent implements OnChanges {
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() confirmed = new EventEmitter<void>();
 
+  private personService = inject(PersonService);
+  private cdr = inject(ChangeDetectorRef);
+
   displayTitle = '';
   selectedDate: Date | null = null;
-  selectedNeden: any = null;
-  nedenOptions: { label: string; value: number }[] = [];
+  selectedReason: { label: string; value: number } | null = null;
+  reasonOptions: { label: string; value: number }[] = [];
   isProcessing = false;
   errorMessage = '';
-
-  constructor(
-    private personService: PersonService,
-    private cdr: ChangeDetectorRef,
-  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['visible'] && this.visible) {
       this.errorMessage = '';
       this.selectedDate = new Date();
-      this.selectedNeden = null;
+      this.selectedReason = null;
 
       if (this.mode === 'exit') {
         this.displayTitle = 'Kişiyi İşten Çıkar';
-        this.loadNedenler();
+        this.loadReasons();
       } else {
         this.displayTitle = 'Kişiyi İşe Geri Al';
         this.selectedDate = new Date();
@@ -65,22 +64,24 @@ export class PersonExitDialogComponent implements OnChanges {
 
   get isFormValid(): boolean {
     if (!this.selectedDate) return false;
-    if (this.mode === 'exit' && (this.selectedNeden === null || this.selectedNeden === undefined)) return false;
+    if (this.mode === 'exit' && (this.selectedReason === null || this.selectedReason === undefined))
+      return false;
     return true;
   }
 
-  private loadNedenler(): void {
-    this.personService.getAyrilisNedenleri().subscribe({
-      next: (data: any[]) => {
-        this.nedenOptions = data
-          .filter((d: any) => d.tip === 'sys_AyrilisNedeni')
-          .map((d: any) => ({ label: d.ad, value: d.id }));
+  private loadReasons(): void {
+    this.personService.getExitReasons().subscribe({
+      next: (data: ExitReason[]) => {
+        this.reasonOptions = data
+          .filter((d: ExitReason) => d.tip === 'sys_AyrilisNedeni')
+          .map((d: ExitReason) => ({ label: d.ad, value: d.id }));
+        console.log(this.reasonOptions);
         this.cdr.markForCheck();
       },
-      error: (err: any) => {
+      error: (err: unknown) => {
         console.error('Ayrılış nedenleri yüklenemedi:', err);
         // Fallback options
-        this.nedenOptions = [
+        this.reasonOptions = [
           { label: 'İstifa', value: 1 },
           { label: 'Emeklilik', value: 2 },
           { label: 'Fesih', value: 3 },
@@ -107,11 +108,13 @@ export class PersonExitDialogComponent implements OnChanges {
 
     if (this.mode === 'exit') {
       this.personService
-        .terminatePerson([this.person.id], this.selectedNeden.value, formattedDate)
+        .terminatePerson([this.person.id], this.selectedReason!.value, formattedDate)
         .subscribe({
-          next: (response: any) => {
+          next: (response: unknown) => {
             this.isProcessing = false;
-            const result = Array.isArray(response) ? response[0] : response;
+            const result = (
+              Array.isArray(response) ? response[0] : response
+            ) as OperationResultResponse;
             if (result?.islemsonuc == '1' || result?.islemsonuc == 1) {
               this.confirmed.emit();
               this.close();
@@ -119,16 +122,19 @@ export class PersonExitDialogComponent implements OnChanges {
               this.errorMessage = 'İşlem başarısız oldu. Lütfen tekrar deneyin.';
             }
           },
-          error: (err: any) => {
+          error: (err: unknown) => {
             this.isProcessing = false;
-            this.errorMessage = 'Bir hata oluştu: ' + (err.message || 'Bilinmeyen hata');
+            this.errorMessage =
+              'Bir hata oluştu: ' + (err instanceof Error ? err.message : 'Bilinmeyen hata');
           },
         });
     } else {
       this.personService.restorePerson(this.person.id, formattedDate).subscribe({
-        next: (response: any) => {
+        next: (response: unknown) => {
           this.isProcessing = false;
-          const result = Array.isArray(response) ? response[0] : response;
+          const result = (
+            Array.isArray(response) ? response[0] : response
+          ) as OperationResultResponse;
           if (result?.islemsonuc == '1' || result?.islemsonuc == 1) {
             this.confirmed.emit();
             this.close();
@@ -136,9 +142,10 @@ export class PersonExitDialogComponent implements OnChanges {
             this.errorMessage = 'İşlem başarısız oldu. Lütfen tekrar deneyin.';
           }
         },
-        error: (err: any) => {
+        error: (err: unknown) => {
           this.isProcessing = false;
-          this.errorMessage = 'Bir hata oluştu: ' + (err.message || 'Bilinmeyen hata');
+          this.errorMessage =
+            'Bir hata oluştu: ' + (err instanceof Error ? err.message : 'Bilinmeyen hata');
         },
       });
     }

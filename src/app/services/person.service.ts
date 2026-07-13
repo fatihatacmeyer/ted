@@ -1,9 +1,9 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, switchMap } from 'rxjs';
 import { APP_CONFIG, AppConfig } from './app-config.service';
 import { HelperService } from './helper.service';
-import { Person, PersonInsertRequest } from '../core/person.model';
+import { Person, PersonInsertRequest, ExitReason } from '../core/person.model';
 import { AuthService } from './auth.service';
 import { PrepareService } from './prepare.service';
 
@@ -11,13 +11,11 @@ import { PrepareService } from './prepare.service';
   providedIn: 'root',
 })
 export class PersonService {
-  constructor(
-    private http: HttpClient,
-    @Inject(APP_CONFIG) private config: AppConfig,
-    private helper: HelperService,
-    private authService: AuthService,
-    private prepareService: PrepareService,
-  ) {}
+  private http = inject(HttpClient);
+  private config: AppConfig = inject(APP_CONFIG);
+  private helper = inject(HelperService);
+  private authService = inject(AuthService);
+  private prepareService = inject(PrepareService);
 
   /** Ortak: mevcut kullanıcının token'ından Authorization header'ı üretir. */
   private buildAuthHeaders(): HttpHeaders {
@@ -90,7 +88,7 @@ export class PersonService {
    * gönderiliyor (muhtemelen eski koddaki bir kusur) — backend bunu kabul
    * ettiği için biz de birebir koruyoruz.
    */
-  insertPerson(personData: PersonInsertRequest): Observable<any> {
+  insertPerson(personData: PersonInsertRequest): Observable<unknown> {
     const apiUrl = `${this.config.apiUrl}/Person`;
 
     if (!personData || personData.userdef == null) {
@@ -174,7 +172,7 @@ export class PersonService {
     const headers = this.buildAuthHeaders();
     console.log('🔍 [insertPerson] payload:', JSON.stringify(payload));
 
-    return this.http.post<any>(apiUrl, payload, { headers });
+    return this.http.post<unknown>(apiUrl, payload, { headers });
   }
 
   /**
@@ -182,7 +180,7 @@ export class PersonService {
    * insertPerson ile aynı payload yapısını kullanır; fark olarak
    * `islemtipi: 'u'` ve gerçek `id` gönderilir.
    */
-  updatePerson(personData: PersonInsertRequest & { id: number }): Observable<any> {
+  updatePerson(personData: PersonInsertRequest & { id: number }): Observable<unknown> {
     const apiUrl = `${this.config.apiUrl}/Person`;
 
     if (!personData || personData.userdef == null) {
@@ -265,7 +263,7 @@ export class PersonService {
 
     console.log('🔍 [updatePerson] payload:', JSON.stringify(payload));
 
-    return this.http.post<any>(apiUrl, payload, { headers });
+    return this.http.post<unknown>(apiUrl, payload, { headers });
   }
 
   /**
@@ -277,7 +275,7 @@ export class PersonService {
    *   POST /Person → ardından GET /Dynamic?Name=SCI!...
    * Dynamic olmadan veri geçici olarak kaydedilir ama aktifleşmez.
    */
-  updateAndConfirm(personData: PersonInsertRequest & { id: number }): Observable<any> {
+  updateAndConfirm(personData: PersonInsertRequest & { id: number }): Observable<unknown> {
     return this.updatePerson(personData).pipe(
       switchMap(() => {
         const sicilno = personData.sicilno || '';
@@ -292,12 +290,12 @@ export class PersonService {
 
         console.log('🔍 [updateAndConfirm] Dynamic URL:', dynamicUrl);
 
-        return this.http.get<any>(dynamicUrl, { headers });
+        return this.http.get<unknown>(dynamicUrl, { headers });
       }),
     );
   }
 
-  terminatePerson(sicilIds: number[], nedenId: number, cikisTarihi: string): Observable<any> {
+  terminatePerson(sicilIds: number[], nedenId: number, cikisTarihi: string): Observable<unknown> {
     const sicilIdString = sicilIds.join('#');
 
     const paramString = this.buildParamString({
@@ -316,10 +314,10 @@ export class PersonService {
     const apiUrl = `${this.config.apiUrl}/Dynamic?Name=${encodeURIComponent(encryptedParam)}`;
     const headers = this.buildAuthHeaders();
 
-    return this.http.get<any>(apiUrl, { headers });
+    return this.http.get<unknown>(apiUrl, { headers });
   }
 
-  restorePerson(sicilId: number, girisTarihi: string): Observable<any> {
+  restorePerson(sicilId: number, girisTarihi: string): Observable<unknown> {
     const paramString = this.buildParamString({
       islemtipi: 'c',
       point: 'sicil',
@@ -335,10 +333,10 @@ export class PersonService {
     const apiUrl = `${this.config.apiUrl}/Dynamic?Name=${encodeURIComponent(encryptedParam)}`;
     const headers = this.buildAuthHeaders();
 
-    return this.http.get<any>(apiUrl, { headers });
+    return this.http.get<unknown>(apiUrl, { headers });
   }
 
-  getAyrilisNedenleri(): Observable<any[]> {
+  getExitReasons(): Observable<ExitReason[]> {
     const paramString = this.buildParamString({
       kaynak: 'access',
       point: 'gridcbo',
@@ -350,11 +348,12 @@ export class PersonService {
     const apiUrl = `${this.config.apiUrl}/Dynamic?Name=${encodeURIComponent(encryptedParam)}`;
     const headers = this.buildAuthHeaders();
 
-    return new Observable<any[]>((observer) => {
-      this.http.get<any>(apiUrl, { headers }).subscribe({
-        next: (data: any) => {
-          console.log('🔍 [getAyrilisNedenleri] RAW response items:', data.length);
-          observer.next(data);
+    return new Observable<ExitReason[]>((observer) => {
+      this.http.get<unknown>(apiUrl, { headers }).subscribe({
+        next: (data) => {
+          const items = (Array.isArray(data) ? data : []) as ExitReason[];
+          console.log('🔍 [getExitReasons] RAW response items:', items.length);
+          observer.next(items);
           observer.complete();
         },
         error: (err) => observer.error(err),

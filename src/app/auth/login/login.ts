@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
@@ -16,21 +16,21 @@ export class LoginComponent implements OnInit, OnDestroy {
   loginForm!: FormGroup;
   errorMessage: string | null = null;
   errorType: 'credential' | 'network' | null = null;
-  showPassword: boolean = false;
-  capsLockOn: boolean = false;
-  isSuccess: boolean = false;
-  isShaking: boolean = false;
-  returnUrl: string = '/home';
-  isLoading: boolean = false;
+  showPassword = false;
+  capsLockOn = false;
+  isSuccess = false;
+  isShaking = false;
+  returnUrl = '/home';
+  isLoading = false;
   private unsubscribe: Subscription[] = [];
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private cdr: ChangeDetectorRef,
-  ) {
+  private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
+
+  constructor() {
     if (this.authService.currentUserValue) {
       this.router.navigate(['/home']);
     }
@@ -85,7 +85,7 @@ export class LoginComponent implements OnInit, OnDestroy {
             this.router.navigate([this.returnUrl]);
           }, 800);
         },
-        error: (err: any) => {
+        error: (err: HttpErrorResponse | Error) => {
           this.parseAndSetError(err);
           this.isLoading = false;
           this.isShaking = true;
@@ -100,7 +100,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.unsubscribe.push(loginSub);
   }
 
-  private parseAndSetError(err: any): void {
+  private parseAndSetError(err: HttpErrorResponse | Error): void {
     if (err instanceof HttpErrorResponse) {
       if (err.status === 0) {
         this.errorMessage = 'Sunucuya bağlanılamadı. İnternet bağlantınızı kontrol edin.';

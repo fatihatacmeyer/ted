@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { PersonService } from '../services/person.service';
 import { Person } from '../core/person.model';
 import { PersonTableComponent } from '../shared/person-table/person-table';
@@ -18,18 +19,16 @@ export class ParentsComponent implements OnInit {
   readonly USERDEF = 13;
 
   persons: Person[] = [];
-  isLoading: boolean = false;
-  errorMessage: string = '';
+  isLoading = false;
+  errorMessage = '';
   showAddDialog = false;
   editPerson: Person | null = null;
   showExitDialog = false;
   exitPerson: Person | null = null;
   exitMode: 'exit' | 'restore' = 'exit';
 
-  constructor(
-    private personService: PersonService,
-    private cdr: ChangeDetectorRef,
-  ) {}
+  private personService = inject(PersonService);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.fetchPersonList();
@@ -45,7 +44,7 @@ export class ParentsComponent implements OnInit {
         this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: (err: any) => {
+      error: (err: HttpErrorResponse) => {
         console.error('Personel listesi yüklenirken hata oluştu:', err);
         this.errorMessage = 'Sistem hatası: Personel listesi sunucudan çekilemedi.';
         this.isLoading = false;

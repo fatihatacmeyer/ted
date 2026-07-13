@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
+import { User } from '../core/person.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class HelperService {
-  userLoginModel: any = {
+  userLoginModel: Partial<User> = {
     customerCode: '',
     fullname: '',
     username: '',
@@ -22,7 +23,6 @@ export class HelperService {
     access: '',
     accessmenu: true,
     admin: false,
+    islemsonuc: '',
   };
-
-  constructor() {}
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import * as CryptoJS from 'crypto-js';
 import { AuthService } from './auth.service';
 
@@ -20,7 +20,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class PrepareService {
-  constructor(private authService: AuthService) {}
+  private authService = inject(AuthService);
 
   prepare(param: string): string {
     const currentUser = this.authService.currentUserValue;

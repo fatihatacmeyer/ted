@@ -101,8 +101,7 @@
 .nav-list a.active {
   background-color: #ffffff;
   color: #dc2134;
-  border-left: 3px solid #dc2134;
-  padding-left: 9px;
+  box-shadow: inset 3px 0 0 #dc2134;
   font-weight: 700;
 }
 

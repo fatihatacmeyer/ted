@@ -17,7 +17,7 @@ interface NavItem {
 export class SidebarComponent {
   @Input() isOpen = true;
 
-  @Output() toggle = new EventEmitter<void>();
+  @Output() sidebarToggle = new EventEmitter<void>();
 
   protected readonly navItems: NavItem[] = [
     { label: 'Anasayfa', route: '/home/anasayfa', icon: 'dashboard' },

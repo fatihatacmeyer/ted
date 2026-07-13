@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, SimpleChanges, OnChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
@@ -9,7 +9,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { TooltipModule } from 'primeng/tooltip';
 import { PersonService } from '../services/person.service';
-import { Person } from '../core/person.model';
+import { Person, OperationResultResponse } from '../core/person.model';
 
 @Component({
   selector: 'app-person-form',
@@ -28,7 +28,7 @@ import { Person } from '../core/person.model';
   templateUrl: './person-form.html',
   styleUrl: './person-form.scss',
 })
-export class PersonFormComponent {
+export class PersonFormComponent implements OnChanges {
   @Input() visible = false;
   @Input({ required: true }) userdef!: number;
   @Input() title = 'Yeni Kayıt Ekle';
@@ -40,18 +40,49 @@ export class PersonFormComponent {
   /** Düzenleme modunda mı? NguyenChanges tarafından ayarlanır. */
   isEditMode = false;
 
-  form: FormGroup;
+  private fb = inject(FormBuilder);
+  private personService = inject(PersonService);
+
+  form: FormGroup = this.fb.group({
+    // Kişisel
+    ad: ['', Validators.required],
+    soyad: ['', Validators.required],
+    dogumtarih: [null as Date | null],
+    cinsiyet: [null],
+    kangrubu: [null],
+    // Kimlik
+    sicilno: [''],
+    personelno: [''],
+    cardid: [''],
+    // İletişim
+    ceptelefon: [''],
+    telefon1: [''],
+    email: [''],
+    // Adres
+    adres: [''],
+    il: [''],
+    ilce: [''],
+    // Kurumsal
+    firma: [''],
+    bolum: [''],
+    pozisyon: [''],
+    gorev: [''],
+    altfirma: [''],
+    direktorluk: [''],
+    yaka: [''],
+    giristarih: [null as Date | null],
+  });
   isSaving = false;
   errorMessage = '';
   selectedPhoto: string | null = null;
   photoFileName = '';
 
-  readonly cinsiyetOptions = [
+  readonly genderOptions = [
     { label: 'Erkek', value: 'E' },
     { label: 'Kadın', value: 'K' },
   ];
 
-  readonly kangrubuOptions = [
+  readonly bloodTypeOptions = [
     { label: 'A+', value: 'A+' },
     { label: 'A-', value: 'A-' },
     { label: 'B+', value: 'B+' },
@@ -62,40 +93,6 @@ export class PersonFormComponent {
     { label: 'O-', value: 'O-' },
   ];
 
-  constructor(
-    private fb: FormBuilder,
-    private personService: PersonService,
-  ) {
-    this.form = this.fb.group({
-      // Kişisel
-      ad: ['', Validators.required],
-      soyad: ['', Validators.required],
-      dogumtarih: [null as Date | null],
-      cinsiyet: [null],
-      kangrubu: [null],
-      // Kimlik
-      sicilno: [''],
-      personelno: [''],
-      cardid: [''],
-      // İletişim
-      ceptelefon: [''],
-      telefon1: [''],
-      email: [''],
-      // Adres
-      adres: [''],
-      il: [''],
-      ilce: [''],
-      // Kurumsal
-      firma: [''],
-      bolum: [''],
-      pozisyon: [''],
-      gorev: [''],
-      altfirma: [''],
-      direktorluk: [''],
-      yaka: [''],
-      giristarih: [null as Date | null],
-    });
-  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['editPerson']) {
@@ -234,7 +231,7 @@ export class PersonFormComponent {
     if (this.isEditMode) {
       // UPDATE: Tek aşamalı — POST /Person (AngelWeb'de de Dynamic GET yok)
       this.personService.updatePerson({ ...payload, id: this.editPerson!.id }).subscribe({
-        next: (response: any) => {
+        next: (response: unknown) => {
           this.isSaving = false;
           console.log('🔍 [submit update] response:', JSON.stringify(response));
 
@@ -245,7 +242,7 @@ export class PersonFormComponent {
             return;
           }
 
-          const result = Array.isArray(response) ? response[0] : response;
+          const result = (Array.isArray(response) ? response[0] : response) as OperationResultResponse;
 
           if (result && (result.islemsonuc == '1' || result.islemsonuc == 1)) {
             this.saved.emit();
@@ -257,7 +254,7 @@ export class PersonFormComponent {
             this.errorMessage = `Kayıt güncellenemedi. (islemsonuc=${islemsonuc}, islemno=${islemno})`;
           }
         },
-        error: (err: any) => {
+        error: (err: unknown) => {
           this.isSaving = false;
           console.error('Person update error:', err);
           this.errorMessage = 'Sunucu hatası: Kayıt güncellenemedi.';
@@ -266,11 +263,11 @@ export class PersonFormComponent {
     } else {
       // INSERT: Tek aşamalı — POST /Person
       this.personService.insertPerson(payload).subscribe({
-        next: (response: any) => {
+        next: (response: unknown) => {
           this.isSaving = false;
           console.log('🔍 [submit insert] response:', JSON.stringify(response));
 
-          const result = Array.isArray(response) ? response[0] : response;
+          const result = (Array.isArray(response) ? response[0] : response) as OperationResultResponse;
 
           if (result && (result.islemsonuc == '1' || result.islemsonuc == 1)) {
             this.saved.emit();
@@ -281,7 +278,7 @@ export class PersonFormComponent {
               'Kayıt başarısız oldu. Lütfen tekrar deneyin.';
           }
         },
-        error: (err: any) => {
+        error: (err: unknown) => {
           this.isSaving = false;
           console.error('Person insert error:', err);
           this.errorMessage = 'Sunucu hatası: Kayıt oluşturulamadı.';

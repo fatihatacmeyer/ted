@@ -9,11 +9,10 @@
   margin-top: 60px;
 }
 
-// app-sidebar {
-//   flex: 0 0 220px;
-//   flex-shrink: 0;
-//   transition: all 0.3s ease-in; 
-// }
+app-sidebar {
+  flex: 0 0 220px;
+  flex-shrink: 0;
+}
 
 .layout-body.sidebar-closed app-sidebar {
   flex: 0 0 70px; 

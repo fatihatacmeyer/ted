@@ -1,37 +1,38 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { HelperService } from './helper.service';
 import { APP_CONFIG, AppConfig } from './app-config.service';
+import { User } from '../core/person.model';
 import * as CryptoJS from 'crypto-js';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private currentUserSubject: BehaviorSubject<any>;
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private helper = inject(HelperService);
+  private config: AppConfig = inject(APP_CONFIG);
 
-  get currentUserValue(): any {
+  private currentUserSubject: BehaviorSubject<User | null>;
+
+  get currentUserValue(): User | null {
     return this.currentUserSubject.value;
   }
 
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-    private helper: HelperService,
-    @Inject(APP_CONFIG) private config: AppConfig,
-  ) {
-    let storedUser = this.getAuthFromLocalStorage();
+  constructor() {
+    const storedUser = this.getAuthFromLocalStorage();
 
-    this.currentUserSubject = new BehaviorSubject<any>(storedUser);
+    this.currentUserSubject = new BehaviorSubject<User | null>(storedUser);
     if (storedUser) {
       this.helper.userLoginModel = storedUser;
     }
   }
 
-  login(email: string, password: string, securityCode: string = ''): Observable<any> {
+  login(email: string, password: string, securityCode = ''): Observable<User> {
     const apiUrl = `${this.config.apiUrl}/Login`;
 
     const loginParamString = `LoginName=${encodeURIComponent(email)}&Password=${encodeURIComponent(password)}&ldap=0&SecurityCode=${securityCode}`;
@@ -56,9 +57,9 @@ export class AuthService {
 
     const payload = { param: encryptedParam.toString() };
 
-    return this.http.post<any>(apiUrl, payload).pipe(
+    return this.http.post<unknown>(apiUrl, payload).pipe(
       map((response) => {
-        const user = Array.isArray(response) ? response[0] : response;
+        const user = (Array.isArray(response) ? response[0] : response) as User;
         if (user && (user.islemsonuc == '1' || user.islemsonuc == 1)) {
           this.setAuthToLocalStorage(user);
           this.helper.userLoginModel = user;
@@ -68,8 +69,8 @@ export class AuthService {
           throw new Error('Kullanıcı adı veya şifre hatalı');
         }
       }),
-      catchError((error) => {
-        throw error;
+      catchError((err) => {
+        throw err;
       }),
     );
   }
@@ -82,18 +83,18 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
-  private setAuthToLocalStorage(auth: any) {
+  private setAuthToLocalStorage(auth: User) {
     const authLocalStorageToken = `${this.config.appVersion}-${this.config.USERDATA_KEY}`;
     sessionStorage.setItem(authLocalStorageToken, JSON.stringify(auth));
   }
 
-  private getAuthFromLocalStorage(): any {
+  private getAuthFromLocalStorage(): User | null {
     try {
       const authLocalStorageToken = `${this.config.appVersion}-${this.config.USERDATA_KEY}`;
       const lsValue = sessionStorage.getItem(authLocalStorageToken);
       if (!lsValue) return null;
-      return JSON.parse(lsValue);
-    } catch (error) {
+      return JSON.parse(lsValue) as User;
+    } catch {
       return null;
     }
   }

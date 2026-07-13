@@ -38,9 +38,9 @@ export interface ColumnDef {
 })
 export class PersonTableComponent implements OnInit {
   @Input() persons: Person[] = [];
-  @Input() title: string = '';
-  @Input() loading: boolean = false;
-  @Input() tableId: string = 'default';
+  @Input() title = '';
+  @Input() loading = false;
+  @Input() tableId = 'default';
   @Output() rowClick = new EventEmitter<Person>();
   @Output() terminateRequest = new EventEmitter<Person>();
   @Output() restoreRequest = new EventEmitter<Person>();
@@ -101,8 +101,8 @@ export class PersonTableComponent implements OnInit {
     return this.allColumns.filter(col => this.selectedColumnFields.includes(col.field));
   }
 
-  getFieldValue(person: Person, field: string): any {
-    return (person as Record<string, any>)[field];
+  getFieldValue(person: Person, field: string): string | number | boolean | null {
+    return (person as unknown as Record<string, string | number | boolean | null>)[field] ?? null;
   }
 
   /** Multiselect değiştiğinde çağrılır — her zaman görünür sütunları korur + localStorage'a kaydeder */

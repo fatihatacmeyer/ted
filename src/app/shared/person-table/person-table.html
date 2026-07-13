@@ -78,6 +78,7 @@
             pButton
             icon="pi pi-times"
             class="p-button-danger p-button-text p-button-sm"
+            aria-label="Çıkış Ver"
             pTooltip="Çıkış Ver"
             tooltipPosition="top"
             (click)="terminateRequest.emit(person); $event.stopPropagation()"
@@ -87,6 +88,7 @@
             pButton
             icon="pi pi-replay"
             class="p-button-success p-button-text p-button-sm"
+            aria-label="İşe Geri Al"
             pTooltip="İşe Geri Al"
             tooltipPosition="top"
             (click)="restoreRequest.emit(person); $event.stopPropagation()"

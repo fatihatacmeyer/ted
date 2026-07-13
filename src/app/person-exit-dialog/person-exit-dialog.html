@@ -16,8 +16,9 @@
 
     @if (mode === 'exit') {
       <div class="field">
-        <label class="field-label">Çıkış Tarihi <span class="required">*</span></label>
+        <label class="field-label" for="exitDate">Çıkış Tarihi <span class="required">*</span></label>
         <p-datepicker
+          id="exitDate"
           [(ngModel)]="selectedDate"
           dateFormat="dd.mm.yy"
           [showIcon]="true"
@@ -29,10 +30,11 @@
       </div>
 
       <div class="field">
-        <label class="field-label">Neden <span class="required">*</span></label>
+        <label class="field-label" for="exitNeden">Neden <span class="required">*</span></label>
         <p-select
-          [(ngModel)]="selectedNeden"
-          [options]="nedenOptions"
+          id="exitNeden"
+          [(ngModel)]="selectedReason"
+          [options]="reasonOptions"
           optionLabel="label"
           optionValue="value"
           placeholder="Ayrılış nedeni seçin"
@@ -42,8 +44,9 @@
       </div>
     } @else {
       <div class="field">
-        <label class="field-label">Giriş Tarihi <span class="required">*</span></label>
+        <label class="field-label" for="restoreDate">Giriş Tarihi <span class="required">*</span></label>
         <p-datepicker
+          id="restoreDate"
           [(ngModel)]="selectedDate"
           dateFormat="dd.mm.yy"
           [showIcon]="true"
@@ -67,6 +70,7 @@
         pButton
         label="İptal"
         class="p-button-text"
+        aria-label="İptal"
         (click)="close()"
         [disabled]="isProcessing"
       ></button>
@@ -75,6 +79,7 @@
         [label]="isProcessing ? 'İşleniyor...' : (mode === 'exit' ? 'Çıkış Ver' : 'Geri Al')"
         [class]="mode === 'exit' ? 'p-button-danger' : 'p-button-success'"
         [icon]="mode === 'exit' ? 'pi pi-times' : 'pi pi-replay'"
+        aria-label="İşlemi onayla"
         (click)="onConfirm()"
         [disabled]="!isFormValid || isProcessing"
       ></button>
