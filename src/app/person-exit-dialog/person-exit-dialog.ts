@@ -82,9 +82,9 @@ export class PersonExitDialogComponent implements OnChanges {
         console.error('Ayrılış nedenleri yüklenemedi:', err);
         // Fallback options
         this.reasonOptions = [
-          { label: 'İstifa', value: 1 },
-          { label: 'Emeklilik', value: 2 },
-          { label: 'Fesih', value: 3 },
+          { label: 'Neden 1', value: 1 },
+          { label: 'Neden 2', value: 2 },
+          { label: 'Neden 3', value: 3 },
         ];
         this.cdr.markForCheck();
       },

@@ -13,7 +13,7 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'anasayfa', pathMatch: 'full' },
       {
-        path: 'anasayfa',
+        path: '',
         loadComponent: () => import('./dashboard/dashboard').then((m) => m.DashboardComponent),
       },
       {
@@ -27,6 +27,10 @@ export const routes: Routes = [
       {
         path: 'parents',
         loadComponent: () => import('./parents/parents').then((m) => m.ParentsComponent),
+      },
+      {
+        path: 'transport',
+        loadComponent: () => import('./school-bus/school-bus').then((m) => m.SchoolBusComponent),
       },
     ],
   },

@@ -24,5 +24,6 @@ export class SidebarComponent {
     { label: 'Öğrenciler', route: '/home/students', icon: 'school' },
     { label: 'Öğretmenler', route: '/home/teachers', icon: 'badge' },
     { label: 'Veliler', route: '/home/parents', icon: 'group' },
+    { label: 'Servis', route: '/home/bus', icon: 'directions_bus' },
   ];
 }
