@@ -50,8 +50,6 @@ export class StudentsComponent implements OnInit {
       next: (data: Person[]) => {
         this.allPersons = data;
         this.persons = data.filter((p) => p.userdef === this.USERDEF);
-        // DEBUG: check personelno values
-        console.log('[DEBUG] Students personelno:', this.persons.map(p => ({ id: p.id, name: p.adsoyad, personelno: p.personelno })));
         this.isLoading = false;
         this.cdr.detectChanges();
       },

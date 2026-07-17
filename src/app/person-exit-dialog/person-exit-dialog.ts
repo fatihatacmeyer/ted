@@ -75,7 +75,6 @@ export class PersonExitDialogComponent implements OnChanges {
         this.reasonOptions = data
           .filter((d: ExitReason) => d.tip === 'sys_AyrilisNedeni')
           .map((d: ExitReason) => ({ label: d.ad, value: d.id }));
-        console.log(this.reasonOptions);
         this.cdr.markForCheck();
       },
       error: (err: unknown) => {

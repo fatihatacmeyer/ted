@@ -1,9 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, switchMap } from 'rxjs';
 import { APP_CONFIG, AppConfig } from './app-config.service';
 import { Person, PersonInsertRequest, ExitReason, extractLinkedPersonIds, extractLinkedTeacherIds, buildLinkedPersonelno } from '../core/person.model';
-import { AuthService } from './auth.service';
 import { PrepareService } from './prepare.service';
 
 @Injectable({
@@ -12,15 +11,7 @@ import { PrepareService } from './prepare.service';
 export class PersonService {
   private http = inject(HttpClient);
   private config: AppConfig = inject(APP_CONFIG);
-  private authService = inject(AuthService);
   private prepareService = inject(PrepareService);
-
-  /** Ortak: mevcut kullanıcının token'ından Authorization header'ı üretir. */
-  private buildAuthHeaders(): HttpHeaders {
-    const currentUser = this.authService.currentUserValue;
-    const userToken = currentUser && currentUser.tokenid ? currentUser.tokenid : '';
-    return new HttpHeaders({ Authorization: userToken });
-  }
 
   /**
    * key=value çiftlerini backend'in beklediği "param" string formatına çevirir.
@@ -69,9 +60,8 @@ export class PersonService {
     });
 
     const payload = { param: this.prepareService.prepare(paramString) };
-    const headers = this.buildAuthHeaders();
 
-    return this.http.post<Person[]>(apiUrl, payload, { headers });
+    return this.http.post<Person[]>(apiUrl, payload);
   }
 
   /**
@@ -154,10 +144,6 @@ export class PersonService {
       eksikfmas: 0,
     });
 
-    const currentUser = this.authService.currentUserValue;
-    console.log('🔍 [insertPerson] islemno (SC):', currentUser?.islemno);
-    console.log('🔍 [insertPerson] raw paramString:', paramString);
-
     const encryptedParam = this.prepareService.prepare(paramString);
 
     const payload = {
@@ -167,10 +153,7 @@ export class PersonService {
         : JSON.stringify([{ fotoimage: null }]),
     };
 
-    const headers = this.buildAuthHeaders();
-    console.log('🔍 [insertPerson] payload:', JSON.stringify(payload));
-
-    return this.http.post<unknown>(apiUrl, payload, { headers });
+    return this.http.post<unknown>(apiUrl, payload);
   }
 
   /**
@@ -246,8 +229,6 @@ export class PersonService {
       eksikfmas: 0,
     });
 
-    console.log('🔍 [updatePerson] RAW paramString:', paramString);
-
     const encryptedParam = this.prepareService.prepare(paramString);
 
     const payload = {
@@ -257,11 +238,7 @@ export class PersonService {
         : JSON.stringify([{ fotoimage: null }]),
     };
 
-    const headers = this.buildAuthHeaders();
-
-    console.log('🔍 [updatePerson] payload:', JSON.stringify(payload));
-
-    return this.http.post<unknown>(apiUrl, payload, { headers });
+    return this.http.post<unknown>(apiUrl, payload);
   }
 
   /**
@@ -362,11 +339,8 @@ export class PersonService {
         });
         const encryptedDynamic = this.prepareService.prepare(dynamicParam);
         const dynamicUrl = `${this.config.apiUrl}/Dynamic?Name=${encodeURIComponent(encryptedDynamic)}`;
-        const headers = this.buildAuthHeaders();
 
-        console.log('🔍 [updateAndConfirm] Dynamic URL:', dynamicUrl);
-
-        return this.http.get<unknown>(dynamicUrl, { headers });
+        return this.http.get<unknown>(dynamicUrl);
       }),
     );
   }
@@ -383,14 +357,11 @@ export class PersonService {
       type: 'cikis',
     });
 
-    console.log('🔍 [terminatePerson] RAW paramString:', paramString);
-
     const encryptedParam = this.prepareService.prepare(paramString);
 
     const apiUrl = `${this.config.apiUrl}/Dynamic?Name=${encodeURIComponent(encryptedParam)}`;
-    const headers = this.buildAuthHeaders();
 
-    return this.http.get<unknown>(apiUrl, { headers });
+    return this.http.get<unknown>(apiUrl);
   }
 
   restorePerson(sicilId: number, girisTarihi: string): Observable<unknown> {
@@ -403,13 +374,10 @@ export class PersonService {
       type: 'donus',
     });
 
-    console.log('🔍 [restorePerson] RAW paramString:', paramString);
-
     const encryptedParam = this.prepareService.prepare(paramString);
     const apiUrl = `${this.config.apiUrl}/Dynamic?Name=${encodeURIComponent(encryptedParam)}`;
-    const headers = this.buildAuthHeaders();
 
-    return this.http.get<unknown>(apiUrl, { headers });
+    return this.http.get<unknown>(apiUrl);
   }
 
   getExitReasons(): Observable<ExitReason[]> {
@@ -422,13 +390,11 @@ export class PersonService {
 
     const encryptedParam = this.prepareService.prepare(paramString);
     const apiUrl = `${this.config.apiUrl}/Dynamic?Name=${encodeURIComponent(encryptedParam)}`;
-    const headers = this.buildAuthHeaders();
 
     return new Observable<ExitReason[]>((observer) => {
-      this.http.get<unknown>(apiUrl, { headers }).subscribe({
+      this.http.get<unknown>(apiUrl).subscribe({
         next: (data) => {
           const items = (Array.isArray(data) ? data : []) as ExitReason[];
-          console.log('🔍 [getExitReasons] RAW response items:', items.length);
           observer.next(items);
           observer.complete();
         },
