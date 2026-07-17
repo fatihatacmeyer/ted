@@ -1,16 +1,17 @@
 import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { PersonService } from '../services/person.service';
-import { Person } from '../core/person.model';
+import { Person, extractLinkedPersonIds } from '../core/person.model';
 import { PersonTableComponent } from '../shared/person-table/person-table';
 import { PersonFormComponent } from '../person-form/person-form';
 import { PersonExitDialogComponent } from '../person-exit-dialog/person-exit-dialog';
+import { PersonProfileComponent } from '../person-profile/person-profile';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 @Component({
   selector: 'app-parents',
   standalone: true,
-  imports: [PersonTableComponent, PersonFormComponent, PersonExitDialogComponent, ButtonModule, ProgressSpinnerModule],
+  imports: [PersonTableComponent, PersonFormComponent, PersonExitDialogComponent, PersonProfileComponent, ButtonModule, ProgressSpinnerModule],
   templateUrl: './parents.html',
   styleUrl: './parents.scss',
 })
@@ -19,6 +20,7 @@ export class ParentsComponent implements OnInit {
   readonly USERDEF = 13;
 
   persons: Person[] = [];
+  allPersons: Person[] = [];
   isLoading = false;
   errorMessage = '';
   showAddDialog = false;
@@ -26,6 +28,9 @@ export class ParentsComponent implements OnInit {
   showExitDialog = false;
   exitPerson: Person | null = null;
   exitMode: 'exit' | 'restore' = 'exit';
+  showProfileModal = false;
+  selectedProfilePerson: Person | null = null;
+  parentColumnOverrides = [{ field: 'personelno', header: 'Çocuklar' }];
 
   private personService = inject(PersonService);
   private cdr = inject(ChangeDetectorRef);
@@ -40,6 +45,7 @@ export class ParentsComponent implements OnInit {
 
     this.personService.getPersonList().subscribe({
       next: (data: Person[]) => {
+        this.allPersons = data;
         this.persons = data.filter((p) => p.userdef === this.USERDEF);
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -59,16 +65,41 @@ export class ParentsComponent implements OnInit {
   }
 
   onRowClick(person: Person): void {
+    this.selectedProfilePerson = person;
+    this.showProfileModal = true;
+  }
+
+  onLinkedPersonClick(person: Person): void {
+    this.selectedProfilePerson = person;
+  }
+
+  onEditRequest(person: Person): void {
+    this.showProfileModal = false;
     this.editPerson = person;
     this.showAddDialog = true;
+  }
+
+  getLinkedIds(person: Person): number[] {
+    return extractLinkedPersonIds(person.personelno);
   }
 
   onEditDialogClose(): void {
     this.editPerson = null;
   }
 
-  onPersonSaved(): void {
+  onPersonSaved(response: unknown): void {
+    const personData = (Array.isArray(response) ? response[0] : response) as Person;
+
+    // Bidirectional sync: update linked persons' reference fields in the database
+    if (personData && personData.id) {
+      const newLinkedIds = extractLinkedPersonIds(personData.personelno);
+      if (newLinkedIds.length > 0) {
+        this.personService.updatePersonLinks(personData.id, newLinkedIds, this.allPersons);
+      }
+    }
+
     this.editPerson = null;
+    // Re-fetch to get fresh data from PersonList API
     this.fetchPersonList();
   }
 

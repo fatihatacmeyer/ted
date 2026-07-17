@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, switchMap } from 'rxjs';
 import { APP_CONFIG, AppConfig } from './app-config.service';
 import { HelperService } from './helper.service';
-import { Person, PersonInsertRequest, ExitReason } from '../core/person.model';
+import { Person, PersonInsertRequest, ExitReason, extractLinkedPersonIds, buildLinkedPersonelno } from '../core/person.model';
 import { AuthService } from './auth.service';
 import { PrepareService } from './prepare.service';
 
@@ -120,7 +120,7 @@ export class PersonService {
       giristarih: personData.giristarih || '',
       telefon1: personData.telefon1 || '',
       ceptelefon: personData.ceptelefon || '',
-      okod1: '',
+      okod1: personData.okod1 || '',
       okod2: '',
       okod3: '',
       okod4: '',
@@ -212,7 +212,7 @@ export class PersonService {
       giristarih: personData.giristarih || '',
       telefon1: personData.telefon1 || '',
       ceptelefon: personData.ceptelefon || '',
-      okod1: '',
+      okod1: personData.okod1 || '',
       okod2: '',
       okod3: '',
       okod4: '',
@@ -264,6 +264,59 @@ export class PersonService {
     console.log('🔍 [updatePerson] payload:', JSON.stringify(payload));
 
     return this.http.post<unknown>(apiUrl, payload, { headers });
+  }
+
+  /**
+   * Bidirectional parent-child sync: When a person's linked persons change,
+   * add/remove that personId from the target's personelno field.
+   * Fire-and-forget — errors logged, never blocks the user.
+   */
+  updatePersonLinks(personId: number, newLinkedIds: number[], allPersons: Person[]): void {
+    for (const target of allPersons) {
+      if (target.id === personId) continue;
+
+      const currentIds = extractLinkedPersonIds(target.personelno);
+      const hasLink = currentIds.includes(personId);
+      const shouldHaveLink = newLinkedIds.includes(target.id);
+
+      if (shouldHaveLink && !hasLink) {
+        // Add personId to target's first empty linked-person slot
+        const updated = [...currentIds, personId];
+        this.updateLinkedPerson(target, updated);
+      } else if (!shouldHaveLink && hasLink) {
+        // Remove personId from target's linked-person slots
+        const updated = currentIds.filter(id => id !== personId);
+        this.updateLinkedPerson(target, updated);
+      }
+    }
+  }
+
+  private updateLinkedPerson(person: Person, linkedIds: number[]): void {
+    const payload: PersonInsertRequest & { id: number } = {
+      id: person.id,
+      ad: person.ad || '',
+      soyad: person.soyad || '',
+      firma: person.firma || '',
+      bolum: person.bolum || '',
+      pozisyon: person.pozisyon || '',
+      gorev: person.gorev || '',
+      altfirma: person.altfirma || '',
+      yaka: person.yaka || '',
+      direktorluk: person.direktorluk || '',
+      sicilno: person.sicilno || '',
+      personelno: person.personelno || '',
+      cardid: person.cardid || '',
+      adres: ' ',
+      ceptelefon: person.ceptelefon || '',
+      userdef: person.userdef,
+    };
+
+    // Write linked IDs into personelno with P: prefix
+    payload.personelno = buildLinkedPersonelno(linkedIds);
+
+    this.updatePerson(payload).subscribe({
+      error: (err) => console.error('[updatePersonLinks] Sync error for person', person.id, err),
+    });
   }
 
   /**

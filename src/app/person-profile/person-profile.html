@@ -41,10 +41,9 @@
                 <button
                   pButton
                   type="button"
-                  label="{{ linked.name }} ({{ linked.sicilno || '-' }})"
                   class="p-button-text p-button-sm p-button-link"
                   (click)="onLinkedPersonClick(linked)"
-                ></button>
+                >{{ linked.name }} ({{ linked.sicilno || '-' }})</button>
               </li>
             }
           </ul>
@@ -57,11 +56,10 @@
         <button
           pButton
           type="button"
-          label="Düzenle"
           class="p-button-outlined"
           icon="pi pi-pencil"
           (click)="onEditClick()"
-        ></button>
+        >Düzenle</button>
       </div>
     </div>
   }

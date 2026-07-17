@@ -106,7 +106,7 @@
     <!-- Kimlik Bilgileri -->
     <div class="form-section">
       <h5>Kimlik Bilgileri</h5>
-      <div class="field-row">
+      <!-- <div class="field-row">
         <div class="field">
           <label for="sicilno">Sicil No</label>
           <input pInputText id="sicilno" formControlName="sicilno" placeholder="Sicil numarası" />
@@ -120,7 +120,7 @@
             placeholder="Personel numarası"
           />
         </div>
-      </div>
+      </div> -->
       <div class="field">
         <label for="cardid">Kart ID</label>
         <input pInputText id="cardid" formControlName="cardid" placeholder="Kart numarası" />
@@ -140,7 +140,7 @@
             placeholder="05XX XXX XX XX"
           />
         </div>
-        <div class="field">
+        <!-- <div class="field">
           <label for="telefon1">Telefon</label>
           <input
             pInputText
@@ -148,7 +148,7 @@
             formControlName="telefon1"
             placeholder="Telefon numarası"
           />
-        </div>
+        </div> -->
       </div>
       <div class="field">
         <label for="email">E-posta</label>
@@ -188,8 +188,28 @@
       </div>
     </div>
 
+    <!-- Bağlantılı Kişiler (Veliler / Çocuklar) -->
+    @if (showLinkedPersons) {
+      <div class="form-section">
+        <h5>{{ linkedPersonsLabel }}</h5>
+        <div class="field">
+          <p-multi-select
+            formControlName="linkedPersons"
+            [options]="linkedPersonOptions"
+            [placeholder]="linkedPersonsLabel + ' seçin'"
+            [maxSelectedLabels]="3"
+            optionLabel="label"
+            optionValue="value"
+            styleClass="w-100"
+            display="chip"
+            [showClear]="true"
+          />
+        </div>
+      </div>
+    }
+
     <!-- Kurumsal -->
-    <div class="form-section">
+    <!-- <div class="form-section">
       <h5>Kurumsal Bilgiler</h5>
       <div class="field">
         <label for="firma">Firma</label>
@@ -243,7 +263,7 @@
           styleClass="w-100"
         />
       </div>
-    </div>
+    </div> -->
 
     @if (errorMessage) {
       <div class="error-box">
@@ -252,11 +272,18 @@
     }
 
     <div class="actions">
-      <button pButton type="button" label="Vazgeç" class="p-button-text" aria-label="Vazgeç" (click)="close()"></button>
+      <button
+        pButton
+        type="button"
+        label="Vazgeç"
+        class="p-button-text"
+        aria-label="Vazgeç"
+        (click)="close()"
+      ></button>
       <button
         pButton
         type="submit"
-        [label]="isSaving ? 'Kaydediliyor...' : (isEditMode ? 'Güncelle' : 'Kaydet')"
+        [label]="isSaving ? 'Kaydediliyor...' : isEditMode ? 'Güncelle' : 'Kaydet'"
         [disabled]="isSaving"
         icon="pi pi-check"
         aria-label="Kaydet"

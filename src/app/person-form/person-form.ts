@@ -10,7 +10,7 @@ import { SelectModule } from 'primeng/select';
 import { TooltipModule } from 'primeng/tooltip';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { PersonService } from '../services/person.service';
-import { Person, OperationResultResponse, parseLinkedIds, serializeLinkedIds } from '../core/person.model';
+import { Person, OperationResultResponse, extractLinkedPersonIds, buildLinkedPersonelno } from '../core/person.model';
 
 @Component({
   selector: 'app-person-form',
@@ -39,7 +39,7 @@ export class PersonFormComponent implements OnChanges {
   @Input() linkedPersonIds: number[] = [];
 
   @Output() visibleChange = new EventEmitter<boolean>();
-  @Output() saved = new EventEmitter<void>();
+  @Output() saved = new EventEmitter<unknown>();
 
   /** Düzenleme modunda mı? NguyenChanges tarafından ayarlanır. */
   isEditMode = false;
@@ -135,8 +135,8 @@ export class PersonFormComponent implements OnChanges {
       yaka: p.yakaad || '',
       giristarih: null,
     });
-    // linkedPersons'ı parseLinkedIds ile doldur
-    const linkedIds = parseLinkedIds(p.firma);
+    // linkedPersons'ı personelno alanından oku
+    const linkedIds = extractLinkedPersonIds(p.personelno);
     this.form.patchValue({ linkedPersons: linkedIds });
   }
 
@@ -221,7 +221,7 @@ export class PersonFormComponent implements OnChanges {
       cinsiyet: v.cinsiyet || '',
       kangrubu: v.kangrubu || '',
       sicilno: v.sicilno || '',
-      personelno: v.personelno || '',
+      personelno: this.showLinkedPersons ? buildLinkedPersonelno(v.linkedPersons || []) : (v.personelno || ''),
       cardid: v.cardid || '',
       ceptelefon: v.ceptelefon || '',
       telefon1: v.telefon1 || '',
@@ -231,7 +231,7 @@ export class PersonFormComponent implements OnChanges {
       ilce: v.ilce || '',
       // Düzenleme modunda: orijinal Person'dan gelen ID'leri kullan
       // (form text gösterir ama backend ID bekler — AngelWeb de ID gönderir)
-      firma: serializeLinkedIds(v.linkedPersons || []),
+      firma: this.isEditMode ? (this.editPerson?.firma ?? '') : (v.firma || ''),
       bolum: this.isEditMode ? (this.editPerson?.bolum ?? '') : (v.bolum || ''),
       pozisyon: this.isEditMode ? (this.editPerson?.pozisyon ?? '') : (v.pozisyon || ''),
       gorev: this.isEditMode ? (this.editPerson?.gorev ?? '') : (v.gorev || ''),
@@ -243,39 +243,26 @@ export class PersonFormComponent implements OnChanges {
       fotoImage: this.selectedPhoto,
     };
 
-    console.log('🔍 [submit] isEditMode:', this.isEditMode, '| id:', this.editPerson?.id);
-    if (this.isEditMode) {
-      console.log('🔍 [submit] reference IDs:', JSON.stringify({
-        firma: payload.firma,
-        bolum: payload.bolum,
-        pozisyon: payload.pozisyon,
-        gorev: payload.gorev,
-      }));
-    }
-
     if (this.isEditMode) {
       // UPDATE: Tek aşamalı — POST /Person (AngelWeb'de de Dynamic GET yok)
       this.personService.updatePerson({ ...payload, id: this.editPerson!.id }).subscribe({
         next: (response: unknown) => {
           this.isSaving = false;
-          console.log('🔍 [submit update] response:', JSON.stringify(response));
 
           // Backend [] dönerse — muhtemelen parametre sorunu
           if (Array.isArray(response) && response.length === 0) {
-            console.error('❌ [submit update] Backend boş dizi [] döndü — parametre sorunu olabilir');
-            this.errorMessage = 'Kayıt güncellenemedi. Sunucu boş yanıt döndü. Konsoldaki RAW parametrilere bakın.';
+            this.errorMessage = 'Kayıt güncellenemedi. Sunucu boş yanıt döndü.';
             return;
           }
 
           const result = (Array.isArray(response) ? response[0] : response) as OperationResultResponse;
 
           if (result && (result.islemsonuc == '1' || result.islemsonuc == 1)) {
-            this.saved.emit();
+            this.saved.emit(response);
             this.close();
           } else {
             const islemno = result?.islemno || 'bilinmiyor';
             const islemsonuc = result?.islemsonuc ?? 'bilinmiyor';
-            console.error(`❌ [submit update] islemsonuc=${islemsonuc} | islemno=${islemno}`);
             this.errorMessage = `Kayıt güncellenemedi. (islemsonuc=${islemsonuc}, islemno=${islemno})`;
           }
         },
@@ -290,12 +277,11 @@ export class PersonFormComponent implements OnChanges {
       this.personService.insertPerson(payload).subscribe({
         next: (response: unknown) => {
           this.isSaving = false;
-          console.log('🔍 [submit insert] response:', JSON.stringify(response));
 
           const result = (Array.isArray(response) ? response[0] : response) as OperationResultResponse;
 
           if (result && (result.islemsonuc == '1' || result.islemsonuc == 1)) {
-            this.saved.emit();
+            this.saved.emit(response);
             this.close();
           } else {
             this.errorMessage =

@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
-import { Person, LinkedPerson, parseLinkedIds, resolveLinkedNames } from '../core/person.model';
+import { Person, LinkedPerson, extractLinkedPersonIds, resolveLinkedNames } from '../core/person.model';
 
 @Component({
   selector: 'app-person-profile',
@@ -23,7 +23,7 @@ export class PersonProfileComponent {
 
   get linkedPersons(): LinkedPerson[] {
     if (!this.person) return [];
-    const ids = parseLinkedIds(this.person.firma);
+    const ids = extractLinkedPersonIds(this.person.personelno);
     if (ids.length === 0) return [];
     return resolveLinkedNames(ids, this.allPersons);
   }

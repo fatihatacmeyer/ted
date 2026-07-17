@@ -35,6 +35,8 @@
         [persons]="persons"
         [loading]="isLoading"
         [tableId]="'students'"
+        [allPersons]="allPersons"
+        [columnOverrides]="studentColumnOverrides"
         (rowClick)="onRowClick($event)"
         (terminateRequest)="onTerminateRequest($event)"
         (restoreRequest)="onRestoreRequest($event)"
@@ -43,13 +45,24 @@
   </div>
 </div>
 
+<app-person-profile
+  [(visible)]="showProfileModal"
+  [person]="selectedProfilePerson"
+  [allPersons]="allPersons"
+  [userdefContext]="USERDEF"
+  (personClick)="onLinkedPersonClick($event)"
+  (editRequest)="onEditRequest($event)"
+></app-person-profile>
+
 <app-person-form
   [(visible)]="showAddDialog"
   [userdef]="USERDEF"
   [editPerson]="editPerson"
+  [allPersons]="allPersons"
+  [linkedPersonIds]="editPerson ? getLinkedIds(editPerson) : []"
   [title]="editPerson ? 'Öğrenci Düzenle' : 'Yeni Öğrenci Ekle'"
   (visibleChange)="onEditDialogClose()"
-  (saved)="onPersonSaved()"
+  (saved)="onPersonSaved($event)"
 ></app-person-form>
 
 <app-person-exit-dialog

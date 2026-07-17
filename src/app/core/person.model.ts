@@ -7,6 +7,9 @@ export interface Person {
   personelno: string;
   userid: string;
 
+  // Kişiler arası ilişki (öğrenci-veli bağlantısı) — serbest metin alanı
+  okod1?: string;
+
   // Referans alanları — API hem ID hem text döndürebilir
   firma?: string;       // Firma ID (backend'e update'te ID olarak gönderilir)
   firmaad: string;      // Firma adı (görünen metin)
@@ -72,6 +75,7 @@ export interface PersonInsertRequest {
 
   // Kurumsal
   firma?: string;
+  okod1?: string;
   bolum?: string;
   pozisyon?: string;
   gorev?: string;
@@ -153,3 +157,22 @@ export function resolveLinkedNames(ids: number[], allPersons: Person[]): LinkedP
     };
   });
 }
+
+/**
+ * personelno alanından linked person ID'lerini okur.
+ * Format: "P:235,237" → [235, 237], ya da "00000234" → [] (prefix yok, boş).
+ */
+export function extractLinkedPersonIds(raw: string | null | undefined): number[] {
+  if (!raw || !raw.startsWith('P:')) return [];
+  return parseLinkedIds(raw.substring(2));
+}
+
+/**
+ * Linked person ID'lerinden personelno değeri üretir.
+ * [235, 237] → "P:235,237", [] → "" (boş = backend otomatik doldurur).
+ */
+export function buildLinkedPersonelno(linkedIds: number[]): string {
+  if (linkedIds.length === 0) return '';
+  return 'P:' + linkedIds.join(',');
+}
+

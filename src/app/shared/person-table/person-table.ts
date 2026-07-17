@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Person, parseLinkedIds, resolveLinkedNames } from '../../core/person.model';
+import { Person, resolveLinkedNames, extractLinkedPersonIds } from '../../core/person.model';
 import { TableModule } from 'primeng/table';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { InputTextModule } from 'primeng/inputtext';
@@ -51,7 +51,7 @@ export class PersonTableComponent implements OnInit {
     { field: 'ad', header: 'Ad', sortable: true, filterable: true },
     { field: 'soyad', header: 'Soyad', sortable: true, filterable: true },
     { field: 'sicilno', header: 'Sicil No', sortable: true, filterable: true },
-    { field: 'firma', header: 'Firma', sortable: true },
+    //{ field: 'firma', header: 'Firma', sortable: true },
     { field: 'firmaad', header: 'Firma', sortable: true },
     { field: 'bolumad', header: 'Bölüm', sortable: true },
     { field: 'pozisyonad', header: 'Pozisyon', sortable: true },
@@ -81,7 +81,15 @@ export class PersonTableComponent implements OnInit {
   private readonly alwaysVisible = ['ad', 'soyad'];
 
   private readonly defaultFields = [
-    'ad', 'soyad', 'sicilno', 'firma', 'firmaad', 'bolumad', 'pozisyonad', 'ceptelefon',
+    'ad',
+    'soyad',
+    'sicilno',
+    //'firma',
+    'firmaad',
+    'personelno',
+    'bolumad',
+    'pozisyonad',
+    'ceptelefon',
   ];
 
   selectedColumnFields: string[] = [];
@@ -98,11 +106,11 @@ export class PersonTableComponent implements OnInit {
   }
 
   get globalFilterFields(): string[] {
-    return this.allColumns.map(col => col.field);
+    return this.allColumns.map((col) => col.field);
   }
 
   getVisibleColumns(): ColumnDef[] {
-    return this.allColumns.filter(col => this.selectedColumnFields.includes(col.field));
+    return this.allColumns.filter((col) => this.selectedColumnFields.includes(col.field));
   }
 
   getFieldValue(person: Person, field: string): string | number | boolean | null {
@@ -110,16 +118,16 @@ export class PersonTableComponent implements OnInit {
   }
 
   getLinkedDisplay(person: Person): string {
-    const ids = parseLinkedIds(person.firma);
+    const ids = extractLinkedPersonIds(person.personelno);
     if (ids.length === 0) return '-';
-    if (!this.allPersons.length) return person.firma ?? '-';
+    if (!this.allPersons.length) return '-';
     const linked = resolveLinkedNames(ids, this.allPersons);
-    return linked.map(l => l.name).join(', ');
+    return linked.map((l) => l.name).join(', ');
   }
 
   private applyColumnOverrides(): void {
     for (const override of this.columnOverrides) {
-      const col = this.allColumns.find(c => c.field === override.field);
+      const col = this.allColumns.find((c) => c.field === override.field);
       if (col) {
         col.header = override.header;
       }
@@ -148,21 +156,31 @@ export class PersonTableComponent implements OnInit {
       const raw = localStorage.getItem(this.storageKey);
       if (raw) {
         const parsed: string[] = JSON.parse(raw);
-        // Depolanan değerler hâlâ allColumns'ta var mı filtrele + alwaysVisible'ı ekle
-        const validFields = this.allColumns.map(c => c.field);
-        const filtered = parsed.filter(f => validFields.includes(f));
+        // Depolanan değerler hâlâ allColumns'ta var mı filtrele
+        const validFields = this.allColumns.map((c) => c.field);
+        const filtered = parsed.filter((f) => validFields.includes(f));
+        // Yeni default alanları Depolanan listeye ekle
+        for (const field of this.defaultFields) {
+          if (!filtered.includes(field) && validFields.includes(field)) {
+            filtered.push(field);
+          }
+        }
         for (const field of this.alwaysVisible) {
           if (!filtered.includes(field)) filtered.push(field);
         }
         return filtered;
       }
-    } catch { /* localStorage bozuksa default'a dön */ }
+    } catch {
+      /* localStorage bozuksa default'a dön */
+    }
     return [...this.defaultFields];
   }
 
   private saveToStorage(): void {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.selectedColumnFields));
-    } catch { /* localStorage doluysa sessizce geç */ }
+    } catch {
+      /* localStorage doluysa sessizce geç */
+    }
   }
 }

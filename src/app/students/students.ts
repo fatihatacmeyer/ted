@@ -1,7 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { PersonService } from '../services/person.service';
-import { Person } from '../core/person.model';
+import { Person, extractLinkedPersonIds } from '../core/person.model';
+import { PersonProfileComponent } from '../person-profile/person-profile';
 import { PersonTableComponent } from '../shared/person-table/person-table';
 import { PersonFormComponent } from '../person-form/person-form';
 import { PersonExitDialogComponent } from '../person-exit-dialog/person-exit-dialog';
@@ -10,7 +11,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 @Component({
   selector: 'app-students',
   standalone: true,
-  imports: [PersonTableComponent, PersonFormComponent, PersonExitDialogComponent, ButtonModule, ProgressSpinnerModule],
+  imports: [PersonTableComponent, PersonFormComponent, PersonExitDialogComponent, PersonProfileComponent, ButtonModule, ProgressSpinnerModule],
   templateUrl: './students.html',
   styleUrl: './students.scss',
 })
@@ -26,6 +27,10 @@ export class StudentsComponent implements OnInit {
   showExitDialog = false;
   exitPerson: Person | null = null;
   exitMode: 'exit' | 'restore' = 'exit';
+  allPersons: Person[] = [];
+  showProfileModal = false;
+  selectedProfilePerson: Person | null = null;
+  studentColumnOverrides = [{ field: 'personelno', header: 'Veliler' }];
 
   private personService = inject(PersonService);
   private cdr = inject(ChangeDetectorRef);
@@ -40,7 +45,10 @@ export class StudentsComponent implements OnInit {
 
     this.personService.getPersonList().subscribe({
       next: (data: Person[]) => {
+        this.allPersons = data;
         this.persons = data.filter((p) => p.userdef === this.USERDEF);
+        // DEBUG: check personelno values
+        console.log('[DEBUG] Students personelno:', this.persons.map(p => ({ id: p.id, name: p.adsoyad, personelno: p.personelno })));
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -59,16 +67,27 @@ export class StudentsComponent implements OnInit {
   }
 
   onRowClick(person: Person): void {
-    this.editPerson = person;
-    this.showAddDialog = true;
+    this.selectedProfilePerson = person;
+    this.showProfileModal = true;
   }
 
   onEditDialogClose(): void {
     this.editPerson = null;
   }
 
-  onPersonSaved(): void {
+  onPersonSaved(response: unknown): void {
+    const personData = (Array.isArray(response) ? response[0] : response) as Person;
+
+    // Bidirectional sync: update linked persons' reference fields in the database
+    if (personData && personData.id) {
+      const newLinkedIds = extractLinkedPersonIds(personData.personelno);
+      if (newLinkedIds.length > 0) {
+        this.personService.updatePersonLinks(personData.id, newLinkedIds, this.allPersons);
+      }
+    }
+
     this.editPerson = null;
+    // Re-fetch to get fresh data from PersonList API
     this.fetchPersonList();
   }
 
@@ -91,5 +110,19 @@ export class StudentsComponent implements OnInit {
   onExitConfirmed(): void {
     this.exitPerson = null;
     this.fetchPersonList();
+  }
+
+  onLinkedPersonClick(person: Person): void {
+    this.selectedProfilePerson = person;
+  }
+
+  onEditRequest(person: Person): void {
+    this.showProfileModal = false;
+    this.editPerson = person;
+    this.showAddDialog = true;
+  }
+
+  getLinkedIds(person: Person): number[] {
+    return extractLinkedPersonIds(person.personelno);
   }
 }

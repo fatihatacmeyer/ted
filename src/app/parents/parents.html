@@ -33,6 +33,8 @@
     @if (!isLoading && !errorMessage) {
       <app-person-table
         [persons]="persons"
+        [allPersons]="allPersons"
+        [columnOverrides]="parentColumnOverrides"
         [loading]="isLoading"
         [tableId]="'parents'"
         (rowClick)="onRowClick($event)"
@@ -43,13 +45,24 @@
   </div>
 </div>
 
+<app-person-profile
+  [(visible)]="showProfileModal"
+  [person]="selectedProfilePerson"
+  [allPersons]="allPersons"
+  [userdefContext]="USERDEF"
+  (personClick)="onLinkedPersonClick($event)"
+  (editRequest)="onEditRequest($event)"
+></app-person-profile>
+
 <app-person-form
   [(visible)]="showAddDialog"
   [userdef]="USERDEF"
   [editPerson]="editPerson"
+  [allPersons]="allPersons"
+  [linkedPersonIds]="editPerson ? getLinkedIds(editPerson) : []"
   [title]="editPerson ? 'Veli Düzenle' : 'Yeni Veli Ekle'"
   (visibleChange)="onEditDialogClose()"
-  (saved)="onPersonSaved()"
+  (saved)="onPersonSaved($event)"
 ></app-person-form>
 
 <app-person-exit-dialog
