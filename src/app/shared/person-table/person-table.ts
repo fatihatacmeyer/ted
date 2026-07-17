@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Person, resolveLinkedNames, extractLinkedPersonIds, extractLinkedTeacherIds } from '../../core/person.model';
 import { TableModule } from 'primeng/table';
-import { MultiSelectModule } from 'primeng/multiselect';
 import { InputTextModule } from 'primeng/inputtext';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { IconFieldModule } from 'primeng/iconfield';
@@ -24,7 +23,6 @@ export interface ColumnDef {
   imports: [
     CommonModule,
     TableModule,
-    MultiSelectModule,
     FormsModule,
     InputTextModule,
     FloatLabelModule,
@@ -95,6 +93,10 @@ export class PersonTableComponent implements OnInit {
 
   selectedColumnFields: string[] = [];
 
+  showColumnPanel = false;
+  draggedIndex: number | null = null;
+  dragOverIndex: number | null = null;
+
   filterText = '';
 
   private get storageKey(): string {
@@ -111,7 +113,10 @@ export class PersonTableComponent implements OnInit {
   }
 
   getVisibleColumns(): ColumnDef[] {
-    return this.allColumns.filter((col) => this.selectedColumnFields.includes(col.field));
+    const colMap = new Map(this.allColumns.map(col => [col.field, col]));
+    return this.selectedColumnFields
+      .filter(field => colMap.has(field))
+      .map(field => colMap.get(field)!);
   }
 
   getFieldValue(person: Person, field: string): string | number | boolean | null {
@@ -132,6 +137,83 @@ export class PersonTableComponent implements OnInit {
     if (!this.allPersons.length) return '-';
     const linked = resolveLinkedNames(ids, this.allPersons);
     return linked.map((l) => l.name).join(', ');
+  }
+
+  /* ── Column Selector Panel ─────────────────────────────── */
+
+  get hiddenColumns(): string[] {
+    return this.allColumns
+      .map(c => c.field)
+      .filter(f => !this.selectedColumnFields.includes(f));
+  }
+
+  getColHeader(field: string): string {
+    return this.allColumns.find(c => c.field === field)?.header ?? field;
+  }
+
+  isAlwaysVisible(field: string): boolean {
+    return this.alwaysVisible.includes(field);
+  }
+
+  toggleColumn(field: string): void {
+    const idx = this.selectedColumnFields.indexOf(field);
+    if (idx >= 0) {
+      if (this.alwaysVisible.includes(field)) return;
+      this.selectedColumnFields.splice(idx, 1);
+    } else {
+      this.selectedColumnFields.push(field);
+    }
+    this.saveToStorage();
+  }
+
+  /* ── Drag & Drop ───────────────────────────────────────── */
+
+  onDragStart(event: DragEvent, index: number): void {
+    this.draggedIndex = index;
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', String(index));
+    }
+  }
+
+  onDragOver(event: DragEvent, index: number): void {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+    this.dragOverIndex = index;
+  }
+
+  onDragLeave(): void {
+    this.dragOverIndex = null;
+  }
+
+  onDrop(event: DragEvent, targetIndex: number): void {
+    event.preventDefault();
+    if (this.draggedIndex === null || this.draggedIndex === targetIndex) {
+      this.dragOverIndex = null;
+      return;
+    }
+    const item = this.selectedColumnFields.splice(this.draggedIndex, 1)[0];
+    this.selectedColumnFields.splice(targetIndex, 0, item);
+    this.draggedIndex = null;
+    this.dragOverIndex = null;
+    this.saveToStorage();
+  }
+
+  onDragEnd(): void {
+    this.draggedIndex = null;
+    this.dragOverIndex = null;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.showColumnPanel && this.draggedIndex === null) {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.col-selector-wrapper')) {
+        this.showColumnPanel = false;
+      }
+    }
   }
 
   private applyColumnOverrides(): void {

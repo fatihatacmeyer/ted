@@ -132,7 +132,7 @@
                     class="person-avatar"
                     [class]="person.userdef === 12 ? 'avatar-teacher' : 'avatar-student'"
                   >
-                    {{ person.ad?.charAt(0) }}{{ person.soyad?.charAt(0) }}
+                    {{ person.ad.charAt(0) }}{{ person.soyad.charAt(0) }}
                   </div>
                   <div class="person-info">
                     <span class="person-name">{{ person.adsoyad }}</span>
@@ -439,7 +439,7 @@
           class="person-avatar"
           [class]="person.userdef === 12 ? 'avatar-teacher' : 'avatar-student'"
         >
-          {{ person.ad?.charAt(0) }}{{ person.soyad?.charAt(0) }}
+          {{ person.ad.charAt(0) }}{{ person.soyad.charAt(0) }}
         </div>
         <div class="person-info">
           <span class="person-name">{{ person.adsoyad }}</span>

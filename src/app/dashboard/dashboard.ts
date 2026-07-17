@@ -53,7 +53,8 @@ export class DashboardComponent implements OnInit {
   earlyLeavers: Person[] = [];
 
   /** Geç kalan kişiler (mock veri) */
-  lateArrivals: { name: string; sicilno: string; time: string; expected: string; delay: string }[] = [];
+  lateArrivals: { name: string; sicilno: string; time: string; expected: string; delay: string }[] =
+    [];
 
   /** Son 100 işlem mock */
   recentTransactions: AccessTransaction[] = [];
@@ -101,7 +102,7 @@ export class DashboardComponent implements OnInit {
 
         // Erken çıkan kişiler — öğrenci ve öğretmen, cikistarih dolu olanlar
         this.earlyLeavers = [...this.students, ...this.teachers].filter(
-          (p) => p.cikistarih && p.cikistarih !== '0' && p.cikistarih.trim() !== ''
+          (p) => p.cikistarih && p.cikistarih !== '0' && p.cikistarih.trim() !== '',
         );
 
         // Geç kalan mock veri (öğrencilerden rastgele 5 tanesi)
@@ -210,38 +211,55 @@ export class DashboardComponent implements OnInit {
   }
 
   getUserName(): string {
-    return this.helper.userLoginModel?.fullname || 'Kullanıcı';
+    return (
+      this.helper.userLoginModel?.fullname || this.helper.userLoginModel?.loginname || 'Kullanıcı'
+    );
   }
 
   getUserdefBadge(userdef: number): string {
     switch (userdef) {
-      case 11: return 'Öğrenci';
-      case 12: return 'Öğretmen';
-      case 13: return 'Veli';
-      default: return 'Personel';
+      case 11:
+        return 'Öğrenci';
+      case 12:
+        return 'Öğretmen';
+      case 13:
+        return 'Veli';
+      default:
+        return 'Personel';
     }
   }
 
   getInitials(name: string | undefined): string {
     if (!name) return '?';
-    return name.split(' ').map((n) => n.charAt(0)).join('');
+    return name
+      .split(' ')
+      .map((n) => n.charAt(0))
+      .join('');
   }
 
   getUserdefBadgeClass(userdef: number): string {
     switch (userdef) {
-      case 11: return 'badge-student';
-      case 12: return 'badge-teacher';
-      case 13: return 'badge-parent';
-      default: return 'badge-default';
+      case 11:
+        return 'badge-student';
+      case 12:
+        return 'badge-teacher';
+      case 13:
+        return 'badge-parent';
+      default:
+        return 'badge-default';
     }
   }
 
   getStatusClass(status: string): string {
     switch (status) {
-      case 'Onaylandı': return 'status-approved';
-      case 'Beklemede': return 'status-pending';
-      case 'Tamamlandı': return 'status-done';
-      default: return '';
+      case 'Onaylandı':
+        return 'status-approved';
+      case 'Beklemede':
+        return 'status-pending';
+      case 'Tamamlandı':
+        return 'status-done';
+      default:
+        return '';
     }
   }
 }
