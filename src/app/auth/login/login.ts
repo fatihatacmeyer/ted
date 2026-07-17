@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, ViewChild, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
@@ -11,8 +11,10 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
   imports: [ReactiveFormsModule, RouterModule],
   templateUrl: './login.html',
   styleUrls: ['./login.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LoginComponent implements OnInit, OnDestroy {
+export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild('usernameInput') usernameInput!: ElementRef<HTMLInputElement>;
   loginForm!: FormGroup;
   errorMessage: string | null = null;
   errorType: 'credential' | 'network' | null = null;
@@ -39,10 +41,10 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.initForm();
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
-    setTimeout(() => {
-      const usernameInput = document.querySelector<HTMLInputElement>('#username');
-      usernameInput?.focus();
-    }, 100);
+  }
+
+  ngAfterViewInit(): void {
+    this.usernameInput.nativeElement.focus();
   }
 
   initForm() {
@@ -55,7 +57,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       if (this.errorMessage) {
         this.errorMessage = null;
         this.errorType = null;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
     this.unsubscribe.push(formChangesSub);
@@ -71,7 +73,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.errorType = null;
     this.isLoading = true;
     this.isShaking = false;
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
 
     const loginSub = this.authService
       .login(this.loginForm.value.username, this.loginForm.value.password)
@@ -80,7 +82,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         next: () => {
           this.isLoading = false;
           this.isSuccess = true;
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
           setTimeout(() => {
             this.router.navigate([this.returnUrl]);
           }, 800);
@@ -91,9 +93,9 @@ export class LoginComponent implements OnInit, OnDestroy {
           this.isShaking = true;
           setTimeout(() => {
             this.isShaking = false;
-            this.cdr.detectChanges();
+            this.cdr.markForCheck();
           }, 500);
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         },
       });
 

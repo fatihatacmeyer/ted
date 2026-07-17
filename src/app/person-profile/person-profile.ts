@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
@@ -10,6 +10,7 @@ import { Person, LinkedPerson, extractLinkedPersonIds, extractLinkedTeacherIds, 
   imports: [CommonModule, DialogModule, ButtonModule],
   templateUrl: './person-profile.html',
   styleUrl: './person-profile.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PersonProfileComponent {
   @Input() visible = false;

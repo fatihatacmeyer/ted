@@ -1,5 +1,6 @@
 import {
   Component,
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   EventEmitter,
   Input,
@@ -23,6 +24,7 @@ import { PersonService } from '../services/person.service';
   imports: [CommonModule, FormsModule, DialogModule, ButtonModule, DatePickerModule, SelectModule],
   templateUrl: './person-exit-dialog.html',
   styleUrl: './person-exit-dialog.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PersonExitDialogComponent implements OnChanges {
   @Input() visible = false;

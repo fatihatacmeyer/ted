@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { PersonService } from '../services/person.service';
@@ -28,6 +28,7 @@ export interface AccessTransaction {
   imports: [ButtonModule, ProgressSpinnerModule, DialogModule, TooltipModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent implements OnInit {
   /* ── State ─────────────────────────────────────────────── */
@@ -113,13 +114,13 @@ export class DashboardComponent implements OnInit {
         this.generateMockEventList();
 
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err: HttpErrorResponse) => {
         console.error('Dashboard veri yükleme hatası:', err);
         this.errorMessage = 'Sistem hatası: Veriler yüklenemedi.';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
     });
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { PersonService } from '../services/person.service';
@@ -29,6 +29,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
   ],
   templateUrl: './person-crud-page.html',
   styleUrl: './person-crud-page.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PersonCrudPageComponent implements OnInit {
   /** Route'dan gelen userdef değeri. */
@@ -120,12 +121,12 @@ export class PersonCrudPageComponent implements OnInit {
         }
         this.persons = data.filter((p) => p.userdef === this.USERDEF);
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err: HttpErrorResponse) => {
         this.errorMessage = 'Sistem hatası: Personel listesi sunucudan çekilemedi.';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
     });
   }

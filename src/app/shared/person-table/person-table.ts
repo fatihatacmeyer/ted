@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Person, resolveLinkedNames, extractLinkedPersonIds, extractLinkedTeacherIds } from '../../core/person.model';
 import { TableModule } from 'primeng/table';
@@ -33,6 +33,7 @@ export interface ColumnDef {
   ],
   templateUrl: './person-table.html',
   styleUrl: './person-table.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PersonTableComponent implements OnInit {
   @Input() persons: Person[] = [];

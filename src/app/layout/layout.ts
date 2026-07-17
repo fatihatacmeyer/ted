@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { HeaderComponent } from './header/header';
 import { SidebarComponent } from './sidebar/sidebar';
 import { RouterOutlet } from '@angular/router';
@@ -9,6 +9,7 @@ import { RouterOutlet } from '@angular/router';
   imports: [HeaderComponent, SidebarComponent, RouterOutlet],
   templateUrl: './layout.html',
   styleUrl: './layout.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LayoutComponent {
   isSidebarOpen = true;

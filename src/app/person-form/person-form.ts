@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, SimpleChanges, OnChanges, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, SimpleChanges, OnChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
@@ -29,6 +29,7 @@ import { Person, UserDef, OperationResultResponse, extractLinkedPersonIds, extra
   ],
   templateUrl: './person-form.html',
   styleUrl: './person-form.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PersonFormComponent implements OnChanges {
   @Input() visible = false;

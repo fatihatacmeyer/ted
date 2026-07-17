@@ -173,8 +173,10 @@ export function serializeLinkedIds(ids: number[]): string {
 }
 
 export function resolveLinkedNames(ids: number[], allPersons: Person[]): LinkedPerson[] {
+  if (ids.length === 0 || allPersons.length === 0) return [];
+  const personMap = new Map(allPersons.map(p => [p.id, p]));
   return ids.map(id => {
-    const found = allPersons.find(p => p.id === id);
+    const found = personMap.get(id);
     return {
       id,
       name: found ? found.adsoyad : `Bilinmeyen (#${id})`,
