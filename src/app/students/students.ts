@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { PersonService } from '../services/person.service';
-import { Person, extractLinkedPersonIds } from '../core/person.model';
+import { Person, extractLinkedPersonIds, extractLinkedTeacherIds } from '../core/person.model';
 import { PersonProfileComponent } from '../person-profile/person-profile';
 import { PersonTableComponent } from '../shared/person-table/person-table';
 import { PersonFormComponent } from '../person-form/person-form';
@@ -30,7 +30,10 @@ export class StudentsComponent implements OnInit {
   allPersons: Person[] = [];
   showProfileModal = false;
   selectedProfilePerson: Person | null = null;
-  studentColumnOverrides = [{ field: 'personelno', header: 'Veliler' }];
+  studentColumnOverrides = [
+    { field: 'personelno', header: 'Veliler' },
+    { field: 'linkedTeachers', header: 'Öğretmenler' },
+  ];
 
   private personService = inject(PersonService);
   private cdr = inject(ChangeDetectorRef);
@@ -78,16 +81,20 @@ export class StudentsComponent implements OnInit {
   onPersonSaved(response: unknown): void {
     const personData = (Array.isArray(response) ? response[0] : response) as Person;
 
-    // Bidirectional sync: update linked persons' reference fields in the database
     if (personData && personData.id) {
+      // Bidirectional sync: update linked persons (veliler) reference fields
       const newLinkedIds = extractLinkedPersonIds(personData.personelno);
       if (newLinkedIds.length > 0) {
         this.personService.updatePersonLinks(personData.id, newLinkedIds, this.allPersons);
       }
+      // Bidirectional sync: update linked teachers reference fields
+      const newTeacherIds = extractLinkedTeacherIds(personData.personelno);
+      if (newTeacherIds.length > 0) {
+        this.personService.updateTeacherLinks(personData.id, newTeacherIds, this.allPersons);
+      }
     }
 
     this.editPerson = null;
-    // Re-fetch to get fresh data from PersonList API
     this.fetchPersonList();
   }
 
@@ -124,5 +131,9 @@ export class StudentsComponent implements OnInit {
 
   getLinkedIds(person: Person): number[] {
     return extractLinkedPersonIds(person.personelno);
+  }
+
+  getTeacherLinkedIds(person: Person): number[] {
+    return extractLinkedTeacherIds(person.personelno);
   }
 }

@@ -208,6 +208,26 @@
       </div>
     }
 
+    <!-- Bağlantılı Öğretmenler -->
+    @if (showLinkedTeachers) {
+      <div class="form-section">
+        <h5>Öğretmenler</h5>
+        <div class="field">
+          <p-multi-select
+            formControlName="linkedTeachers"
+            [options]="linkedTeacherOptions"
+            placeholder="Öğretmen seçin"
+            [maxSelectedLabels]="3"
+            optionLabel="label"
+            optionValue="value"
+            styleClass="w-100"
+            display="chip"
+            [showClear]="true"
+          />
+        </div>
+      </div>
+    }
+
     <!-- Kurumsal -->
     <!-- <div class="form-section">
       <h5>Kurumsal Bilgiler</h5>

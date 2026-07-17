@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
-import { Person, LinkedPerson, extractLinkedPersonIds, resolveLinkedNames } from '../core/person.model';
+import { Person, LinkedPerson, extractLinkedPersonIds, extractLinkedTeacherIds, resolveLinkedNames } from '../core/person.model';
 
 @Component({
   selector: 'app-person-profile',
@@ -28,14 +28,45 @@ export class PersonProfileComponent {
     return resolveLinkedNames(ids, this.allPersons);
   }
 
+  get linkedTeachers(): LinkedPerson[] {
+    if (!this.person) return [];
+    const ids = extractLinkedTeacherIds(this.person.personelno);
+    if (ids.length === 0) return [];
+    return resolveLinkedNames(ids, this.allPersons);
+  }
+
+  /** Öğrenci (11) ise hem veliler hem öğretmenler görünür */
+  get showLinkedPersons(): boolean {
+    const ctx = this.person?.userdef ?? this.userdefContext;
+    return ctx === 11 || ctx === 13;
+  }
+
+  get showLinkedTeachers(): boolean {
+    const ctx = this.person?.userdef ?? this.userdefContext;
+    return ctx === 11;
+  }
+
+  /** Dinamik label — tıklanan kişinin userdef değerine göre */
   get linkedPersonsLabel(): string {
-    if (this.userdefContext === 11) return 'Veliler';
-    if (this.userdefContext === 13) return 'Çocuklar';
+    const ctx = this.person?.userdef ?? this.userdefContext;
+    if (ctx === 11) return 'Veliler';
+    if (ctx === 13) return 'Çocuklar';
     return 'Bağlantılı Kişiler';
+  }
+
+  /** Dinamik label — öğretmenler bölümü için */
+  get linkedTeachersLabel(): string {
+    const ctx = this.person?.userdef ?? this.userdefContext;
+    if (ctx === 11) return 'Öğretmenler';
+    return 'Bağlantılı Öğretmenler';
   }
 
   get hasLinkedPersons(): boolean {
     return this.linkedPersons.length > 0;
+  }
+
+  get hasLinkedTeachers(): boolean {
+    return this.linkedTeachers.length > 0;
   }
 
   onLinkedPersonClick(linked: LinkedPerson): void {

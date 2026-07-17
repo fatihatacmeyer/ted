@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, switchMap } from 'rxjs';
 import { APP_CONFIG, AppConfig } from './app-config.service';
 import { HelperService } from './helper.service';
-import { Person, PersonInsertRequest, ExitReason, extractLinkedPersonIds, buildLinkedPersonelno } from '../core/person.model';
+import { Person, PersonInsertRequest, ExitReason, extractLinkedPersonIds, extractLinkedTeacherIds, buildLinkedPersonelno } from '../core/person.model';
 import { AuthService } from './auth.service';
 import { PrepareService } from './prepare.service';
 
@@ -269,29 +269,54 @@ export class PersonService {
   /**
    * Bidirectional parent-child sync: When a person's linked persons change,
    * add/remove that personId from the target's personelno field.
+   * Also handles teacher links (T: prefix).
    * Fire-and-forget — errors logged, never blocks the user.
    */
   updatePersonLinks(personId: number, newLinkedIds: number[], allPersons: Person[]): void {
     for (const target of allPersons) {
       if (target.id === personId) continue;
 
-      const currentIds = extractLinkedPersonIds(target.personelno);
-      const hasLink = currentIds.includes(personId);
+      const currentParentIds = extractLinkedPersonIds(target.personelno);
+      const currentTeacherIds = extractLinkedTeacherIds(target.personelno);
+      const hasLink = currentParentIds.includes(personId);
       const shouldHaveLink = newLinkedIds.includes(target.id);
 
       if (shouldHaveLink && !hasLink) {
-        // Add personId to target's first empty linked-person slot
-        const updated = [...currentIds, personId];
-        this.updateLinkedPerson(target, updated);
+        const updated = [...currentParentIds, personId];
+        this.updateLinkedPerson(target, updated, currentTeacherIds);
       } else if (!shouldHaveLink && hasLink) {
-        // Remove personId from target's linked-person slots
-        const updated = currentIds.filter(id => id !== personId);
-        this.updateLinkedPerson(target, updated);
+        const updated = currentParentIds.filter(id => id !== personId);
+        this.updateLinkedPerson(target, updated, currentTeacherIds);
       }
     }
   }
 
-  private updateLinkedPerson(person: Person, linkedIds: number[]): void {
+  /**
+   * Bidirectional teacher-student sync: When a student's linked teachers change,
+   * add/remove the studentId from the teacher's personelno T: field.
+   * Fire-and-forget — errors logged, never blocks the user.
+   */
+  updateTeacherLinks(studentId: number, newTeacherIds: number[], allPersons: Person[]): void {
+    for (const target of allPersons) {
+      if (target.id === studentId) continue;
+      if (target.userdef !== 12) continue; // only sync to teachers
+
+      const currentParentIds = extractLinkedPersonIds(target.personelno);
+      const currentTeacherIds = extractLinkedTeacherIds(target.personelno);
+      const hasLink = currentTeacherIds.includes(studentId);
+      const shouldHaveLink = newTeacherIds.includes(target.id);
+
+      if (shouldHaveLink && !hasLink) {
+        const updated = [...currentTeacherIds, studentId];
+        this.updateLinkedPerson(target, currentParentIds, updated);
+      } else if (!shouldHaveLink && hasLink) {
+        const updated = currentTeacherIds.filter(id => id !== studentId);
+        this.updateLinkedPerson(target, currentParentIds, updated);
+      }
+    }
+  }
+
+  private updateLinkedPerson(person: Person, linkedIds: number[], teacherIds: number[] = []): void {
     const payload: PersonInsertRequest & { id: number } = {
       id: person.id,
       ad: person.ad || '',
@@ -311,8 +336,8 @@ export class PersonService {
       userdef: person.userdef,
     };
 
-    // Write linked IDs into personelno with P: prefix
-    payload.personelno = buildLinkedPersonelno(linkedIds);
+    // Write linked IDs into personelno with both P: and T: prefixes
+    payload.personelno = buildLinkedPersonelno(linkedIds, teacherIds);
 
     this.updatePerson(payload).subscribe({
       error: (err) => console.error('[updatePersonLinks] Sync error for person', person.id, err),

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Person, resolveLinkedNames, extractLinkedPersonIds } from '../../core/person.model';
+import { Person, resolveLinkedNames, extractLinkedPersonIds, extractLinkedTeacherIds } from '../../core/person.model';
 import { TableModule } from 'primeng/table';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { InputTextModule } from 'primeng/inputtext';
@@ -58,6 +58,7 @@ export class PersonTableComponent implements OnInit {
     { field: 'ceptelefon', header: 'Telefon' },
     { field: 'id', header: 'ID', sortable: true },
     { field: 'personelno', header: 'Personel No', sortable: true },
+    { field: 'linkedTeachers', header: 'Öğretmenler', sortable: false },
     { field: 'userid', header: 'User ID' },
     { field: 'altfirmaad', header: 'Alt Firma' },
     { field: 'direktorlukad', header: 'Direktörlük' },
@@ -119,6 +120,14 @@ export class PersonTableComponent implements OnInit {
 
   getLinkedDisplay(person: Person): string {
     const ids = extractLinkedPersonIds(person.personelno);
+    if (ids.length === 0) return '-';
+    if (!this.allPersons.length) return '-';
+    const linked = resolveLinkedNames(ids, this.allPersons);
+    return linked.map((l) => l.name).join(', ');
+  }
+
+  getTeacherLinkedDisplay(person: Person): string {
+    const ids = extractLinkedTeacherIds(person.personelno);
     if (ids.length === 0) return '-';
     if (!this.allPersons.length) return '-';
     const linked = resolveLinkedNames(ids, this.allPersons);

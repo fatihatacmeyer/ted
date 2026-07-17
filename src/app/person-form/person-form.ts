@@ -10,7 +10,7 @@ import { SelectModule } from 'primeng/select';
 import { TooltipModule } from 'primeng/tooltip';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { PersonService } from '../services/person.service';
-import { Person, OperationResultResponse, extractLinkedPersonIds, buildLinkedPersonelno } from '../core/person.model';
+import { Person, OperationResultResponse, extractLinkedPersonIds, extractLinkedTeacherIds, buildLinkedPersonelno } from '../core/person.model';
 
 @Component({
   selector: 'app-person-form',
@@ -76,6 +76,7 @@ export class PersonFormComponent implements OnChanges {
     yaka: [''],
     giristarih: [null as Date | null],
     linkedPersons: [[] as number[]],
+    linkedTeachers: [[] as number[]],
   });
   isSaving = false;
   errorMessage = '';
@@ -138,6 +139,9 @@ export class PersonFormComponent implements OnChanges {
     // linkedPersons'ı personelno alanından oku
     const linkedIds = extractLinkedPersonIds(p.personelno);
     this.form.patchValue({ linkedPersons: linkedIds });
+    // linkedTeachers'ı personelno alanından oku
+    const teacherIds = extractLinkedTeacherIds(p.personelno);
+    this.form.patchValue({ linkedTeachers: teacherIds });
   }
 
   /** Backend'den gelen 'YYYY-MM-DD' string'ini Date objesine çevirir. */
@@ -157,7 +161,7 @@ export class PersonFormComponent implements OnChanges {
     this.selectedPhoto = null;
     this.photoFileName = '';
     this.form.reset();
-    this.form.patchValue({ linkedPersons: [] });
+    this.form.patchValue({ linkedPersons: [], linkedTeachers: [] });
   }
 
   onPhotoSelected(event: Event): void {
@@ -195,8 +199,18 @@ export class PersonFormComponent implements OnChanges {
       .map(p => ({ label: `${p.adsoyad} (${p.sicilno})`, value: p.id }));
   }
 
+  get linkedTeacherOptions(): { label: string; value: number }[] {
+    return this.allPersons
+      .filter(p => p.userdef === 12)
+      .map(p => ({ label: `${p.adsoyad} (${p.sicilno})`, value: p.id }));
+  }
+
   get showLinkedPersons(): boolean {
     return this.userdef === 11 || this.userdef === 13;
+  }
+
+  get showLinkedTeachers(): boolean {
+    return this.userdef === 11;
   }
 
   get linkedPersonsLabel(): string {
@@ -221,7 +235,7 @@ export class PersonFormComponent implements OnChanges {
       cinsiyet: v.cinsiyet || '',
       kangrubu: v.kangrubu || '',
       sicilno: v.sicilno || '',
-      personelno: this.showLinkedPersons ? buildLinkedPersonelno(v.linkedPersons || []) : (v.personelno || ''),
+      personelno: this.showLinkedPersons ? buildLinkedPersonelno(v.linkedPersons || [], v.linkedTeachers || []) : (v.personelno || ''),
       cardid: v.cardid || '',
       ceptelefon: v.ceptelefon || '',
       telefon1: v.telefon1 || '',

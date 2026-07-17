@@ -159,20 +159,35 @@ export function resolveLinkedNames(ids: number[], allPersons: Person[]): LinkedP
 }
 
 /**
- * personelno alanından linked person ID'lerini okur.
- * Format: "P:235,237" → [235, 237], ya da "00000234" → [] (prefix yok, boş).
+ * personelno alanından linked person (veli) ID'lerini okur.
+ * Format: "P:235,237 T:450,451" → [235, 237], ya da "00000234" → [] (prefix yok, boş).
  */
 export function extractLinkedPersonIds(raw: string | null | undefined): number[] {
-  if (!raw || !raw.startsWith('P:')) return [];
-  return parseLinkedIds(raw.substring(2));
+  if (!raw) return [];
+  const match = raw.match(/P:([0-9,\s]*)/);
+  if (!match || !match[1].trim()) return [];
+  return parseLinkedIds(match[1]);
 }
 
 /**
- * Linked person ID'lerinden personelno değeri üretir.
- * [235, 237] → "P:235,237", [] → "" (boş = backend otomatik doldurur).
+ * personelno alanından linked teacher (öğretmen) ID'lerini okur.
+ * Format: "P:235,237 T:450,451" → [450, 451]
  */
-export function buildLinkedPersonelno(linkedIds: number[]): string {
-  if (linkedIds.length === 0) return '';
-  return 'P:' + linkedIds.join(',');
+export function extractLinkedTeacherIds(raw: string | null | undefined): number[] {
+  if (!raw) return [];
+  const match = raw.match(/T:([0-9,\s]*)/);
+  if (!match || !match[1].trim()) return [];
+  return parseLinkedIds(match[1]);
+}
+
+/**
+ * Linked person (veli) ve teacher (öğretmen) ID'lerinden personelno değeri üretir.
+ * buildLinkedPersonelno([235, 237], [450, 451]) → "P:235,237 T:450,451"
+ */
+export function buildLinkedPersonelno(linkedIds: number[], teacherIds: number[] = []): string {
+  const parts: string[] = [];
+  if (linkedIds.length > 0) parts.push('P:' + linkedIds.join(','));
+  if (teacherIds.length > 0) parts.push('T:' + teacherIds.join(','));
+  return parts.join(' ');
 }
 
