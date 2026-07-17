@@ -1,3 +1,28 @@
+/** Backend'deki userdef değerlerini temsil eden enum. */
+export enum UserDef {
+  Ogrenci  = 11,
+  Ogretmen = 12,
+  Veli     = 13,
+}
+
+export function getUserDefLabel(userdef: number): string {
+  switch (userdef) {
+    case UserDef.Ogrenci:  return 'Öğrenci';
+    case UserDef.Ogretmen: return 'Öğretmen';
+    case UserDef.Veli:     return 'Veli';
+    default:               return 'Personel';
+  }
+}
+
+export function getUserDefBadgeClass(userdef: number): string {
+  switch (userdef) {
+    case UserDef.Ogrenci:  return 'badge-student';
+    case UserDef.Ogretmen: return 'badge-teacher';
+    case UserDef.Veli:     return 'badge-parent';
+    default:               return 'badge-default';
+  }
+}
+
 export interface Person {
   id: number;
   ad: string;
@@ -48,7 +73,7 @@ export interface Person {
 /**
  * Yeni sicil (kayıt) ekleme isteği için kullanılan DTO.
  * Formdan gelen alanlar + hangi component'ten geldiğini belirten userdef.
- * userdef: 11 = Öğrenci, 12 = Öğretmen, 13 = Veli
+ * Bakınız: UserDef enum'u.
  */
 export interface PersonInsertRequest {
   // Kişisel Bilgiler

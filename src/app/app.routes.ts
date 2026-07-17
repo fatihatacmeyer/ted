@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
+import { UserDef } from './core/person.model';
 
 export const routes: Routes = [
   {
@@ -18,15 +19,18 @@ export const routes: Routes = [
       },
       {
         path: 'students',
-        loadComponent: () => import('./students/students').then((m) => m.StudentsComponent),
+        data: { userDef: UserDef.Ogrenci },
+        loadComponent: () => import('./person-crud-page/person-crud-page').then((m) => m.PersonCrudPageComponent),
       },
       {
         path: 'teachers',
-        loadComponent: () => import('./teachers/teachers').then((m) => m.TeachersComponent),
+        data: { userDef: UserDef.Ogretmen },
+        loadComponent: () => import('./person-crud-page/person-crud-page').then((m) => m.PersonCrudPageComponent),
       },
       {
         path: 'parents',
-        loadComponent: () => import('./parents/parents').then((m) => m.ParentsComponent),
+        data: { userDef: UserDef.Veli },
+        loadComponent: () => import('./person-crud-page/person-crud-page').then((m) => m.PersonCrudPageComponent),
       },
       {
         path: 'transport',

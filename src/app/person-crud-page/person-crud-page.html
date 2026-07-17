@@ -1,20 +1,20 @@
 <div class="admin-wrapper">
   <div class="admin-card">
     <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
-      <h4 class="fw-bold mb-0" style="color: #dc2134;">Öğrenciler</h4>
+      <h4 class="fw-bold mb-0" style="color: #dc2134;">{{ pageTitle }}</h4>
 
       <button
         pButton
         class="p-button-sm"
         icon="pi pi-plus"
-        label="Öğrenci Ekle"
-        aria-label="Öğrenci Ekle"
+        [label]="addLabel"
+        [attr.aria-label]="addLabel"
         (click)="openAddDialog()"
       ></button>
     </div>
 
     <div class="small text-muted mb-3">
-      Öğrenci listesini buradan görüntüleyebilir ve yeni kayıt ekleyebilirsiniz.
+      {{ descriptionText }}
     </div>
 
     @if (isLoading) {
@@ -34,9 +34,9 @@
       <app-person-table
         [persons]="persons"
         [loading]="isLoading"
-        [tableId]="'students'"
+        [tableId]="USERDEF.toString()"
         [allPersons]="allPersons"
-        [columnOverrides]="studentColumnOverrides"
+        [columnOverrides]="columnOverrides"
         (rowClick)="onRowClick($event)"
         (terminateRequest)="onTerminateRequest($event)"
         (restoreRequest)="onRestoreRequest($event)"
@@ -45,14 +45,16 @@
   </div>
 </div>
 
-<app-person-profile
-  [(visible)]="showProfileModal"
-  [person]="selectedProfilePerson"
-  [allPersons]="allPersons"
-  [userdefContext]="USERDEF"
-  (personClick)="onLinkedPersonClick($event)"
-  (editRequest)="onEditRequest($event)"
-></app-person-profile>
+@if (hasProfileModal) {
+  <app-person-profile
+    [(visible)]="showProfileModal"
+    [person]="selectedProfilePerson"
+    [allPersons]="allPersons"
+    [userdefContext]="USERDEF"
+    (personClick)="onLinkedPersonClick($event)"
+    (editRequest)="onEditRequest($event)"
+  ></app-person-profile>
+}
 
 <app-person-form
   [(visible)]="showAddDialog"
@@ -60,7 +62,7 @@
   [editPerson]="editPerson"
   [allPersons]="allPersons"
   [linkedPersonIds]="editPerson ? getLinkedIds(editPerson) : []"
-  [title]="editPerson ? 'Öğrenci Düzenle' : 'Yeni Öğrenci Ekle'"
+  [title]="formTitle"
   (visibleChange)="onEditDialogClose()"
   (saved)="onPersonSaved($event)"
 ></app-person-form>

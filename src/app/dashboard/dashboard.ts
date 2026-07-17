@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { PersonService } from '../services/person.service';
-import { Person } from '../core/person.model';
+import { Person, UserDef, getUserDefLabel, getUserDefBadgeClass } from '../core/person.model';
 import { AuthService } from '../services/auth.service';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -90,9 +90,9 @@ export class DashboardComponent implements OnInit {
         this.allPersons = data;
 
         // Gerçek veriye dayalı sayılar
-        this.students = data.filter((p) => p.userdef === 11);
-        this.teachers = data.filter((p) => p.userdef === 12);
-        this.parents = data.filter((p) => p.userdef === 13);
+        this.students = data.filter((p) => p.userdef === UserDef.Ogrenci);
+        this.teachers = data.filter((p) => p.userdef === UserDef.Ogretmen);
+        this.parents = data.filter((p) => p.userdef === UserDef.Veli);
 
         this.studentCount = this.students.length;
         this.teacherCount = this.teachers.length;
@@ -215,16 +215,7 @@ export class DashboardComponent implements OnInit {
   }
 
   getUserdefBadge(userdef: number): string {
-    switch (userdef) {
-      case 11:
-        return 'Öğrenci';
-      case 12:
-        return 'Öğretmen';
-      case 13:
-        return 'Veli';
-      default:
-        return 'Personel';
-    }
+    return getUserDefLabel(userdef);
   }
 
   getInitials(name: string | undefined): string {
@@ -236,16 +227,7 @@ export class DashboardComponent implements OnInit {
   }
 
   getUserdefBadgeClass(userdef: number): string {
-    switch (userdef) {
-      case 11:
-        return 'badge-student';
-      case 12:
-        return 'badge-teacher';
-      case 13:
-        return 'badge-parent';
-      default:
-        return 'badge-default';
-    }
+    return getUserDefBadgeClass(userdef);
   }
 
   getStatusClass(status: string): string {

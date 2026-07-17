@@ -10,7 +10,7 @@ import { SelectModule } from 'primeng/select';
 import { TooltipModule } from 'primeng/tooltip';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { PersonService } from '../services/person.service';
-import { Person, OperationResultResponse, extractLinkedPersonIds, extractLinkedTeacherIds, buildLinkedPersonelno } from '../core/person.model';
+import { Person, UserDef, OperationResultResponse, extractLinkedPersonIds, extractLinkedTeacherIds, buildLinkedPersonelno } from '../core/person.model';
 
 @Component({
   selector: 'app-person-form',
@@ -192,8 +192,8 @@ export class PersonFormComponent implements OnChanges {
   }
 
   get linkedPersonOptions(): { label: string; value: number }[] {
-    // userdef=11 → show userdef=13 (parents), userdef=13 → show userdef=11 (children)
-    const targetUserdef = this.userdef === 11 ? 13 : 11;
+    // userdef=Ogrenci → show userdef=Veli, userdef=Veli → show userdef=Ogrenci
+    const targetUserdef = this.userdef === UserDef.Ogrenci ? UserDef.Veli : UserDef.Ogrenci;
     return this.allPersons
       .filter(p => p.userdef === targetUserdef)
       .map(p => ({ label: `${p.adsoyad} (${p.sicilno})`, value: p.id }));
@@ -201,20 +201,20 @@ export class PersonFormComponent implements OnChanges {
 
   get linkedTeacherOptions(): { label: string; value: number }[] {
     return this.allPersons
-      .filter(p => p.userdef === 12)
+      .filter(p => p.userdef === UserDef.Ogretmen)
       .map(p => ({ label: `${p.adsoyad} (${p.sicilno})`, value: p.id }));
   }
 
   get showLinkedPersons(): boolean {
-    return this.userdef === 11 || this.userdef === 13;
+    return this.userdef === UserDef.Ogrenci || this.userdef === UserDef.Veli;
   }
 
   get showLinkedTeachers(): boolean {
-    return this.userdef === 11;
+    return this.userdef === UserDef.Ogrenci;
   }
 
   get linkedPersonsLabel(): string {
-    return this.userdef === 11 ? 'Veliler' : 'Çocuklar';
+    return this.userdef === UserDef.Ogrenci ? 'Veliler' : 'Çocuklar';
   }
 
   submit(): void {

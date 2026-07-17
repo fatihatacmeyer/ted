@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, switchMap } from 'rxjs';
 import { APP_CONFIG, AppConfig } from './app-config.service';
-import { Person, PersonInsertRequest, ExitReason, extractLinkedPersonIds, extractLinkedTeacherIds, buildLinkedPersonelno } from '../core/person.model';
+import { Person, PersonInsertRequest, ExitReason, UserDef, extractLinkedPersonIds, extractLinkedTeacherIds, buildLinkedPersonelno } from '../core/person.model';
 import { PrepareService } from './prepare.service';
 
 @Injectable({
@@ -26,6 +26,90 @@ export class PersonService {
     return Object.entries(params)
       .map(([key, value]) => `${key}=${value ?? ''}`)
       .join('&');
+  }
+
+  /**
+   * insertPerson ve updatePerson arasındaki ortak payload yapısını oluşturur.
+   * Farklılık sadece islemtipi ('i'|'u') ve id (0|gerçek id) parametreleridir.
+   *
+   * okod17-okod20 için "undefined" string'i legacy sistemde de aynen
+   * gönderiliyor (muhtemelen eski koddaki bir kusur) — backend bunu kabul
+   * ettiği için biz de birebir koruyoruz.
+   */
+  private buildPersonPayload(
+    personData: PersonInsertRequest,
+    islemtipi: 'i' | 'u',
+    id: number,
+  ): { Param: string; FotoImage: string } {
+    const paramString = this.buildParamString({
+      islemtipi,
+      id,
+      ad: personData.ad || '',
+      soyad: personData.soyad || '',
+      sicilno: personData.sicilno || '',
+      personelno: personData.personelno || '',
+      firma: personData.firma || '',
+      bolum: personData.bolum || '',
+      pozisyon: personData.pozisyon || '',
+      gorev: personData.gorev || '',
+      altfirma: personData.altfirma || '',
+      yaka: personData.yaka || '',
+      direktorluk: personData.direktorluk || '',
+      kangrubu: personData.kangrubu || '',
+      cinsiyet: personData.cinsiyet || '',
+      maastipi: '',
+      adres: personData.adres || ' ',
+      il: personData.il || '',
+      ilce: personData.ilce || '',
+      email: personData.email || '',
+      dogumtarih: personData.dogumtarih || '',
+      giristarih: personData.giristarih || '',
+      telefon1: personData.telefon1 || '',
+      ceptelefon: personData.ceptelefon || '',
+      okod1: personData.okod1 || '',
+      okod2: '',
+      okod3: '',
+      okod4: '',
+      okod5: '',
+      okod6: '',
+      okod7: '',
+      okod8: '',
+      okod9: '',
+      okod10: '',
+      okod11: '',
+      okod12: '',
+      okod13: '',
+      okod14: '',
+      okod15: '',
+      okod16: '',
+      okod17: 'undefined',
+      okod18: 'undefined',
+      okod19: 'undefined',
+      okod20: 'undefined',
+      cardid: personData.cardid || '',
+      cardid26: '',
+      facilitycode: '',
+      master: '',
+      bypasscard: '',
+      puantaj: '',
+      userdef: personData.userdef,
+      fazlamesai: 0,
+      eksikmesai: 0,
+      erkenmesai: 0,
+      eksikgun: 0,
+      gecezammi: 0,
+      eksikfm: 0,
+      eksikfmas: 0,
+    });
+
+    const encryptedParam = this.prepareService.prepare(paramString);
+
+    return {
+      Param: encryptedParam,
+      FotoImage: personData.fotoImage
+        ? JSON.stringify([{ fotoimage: personData.fotoImage }])
+        : JSON.stringify([{ fotoimage: null }]),
+    };
   }
 
   getPersonList(): Observable<Person[]> {
@@ -66,94 +150,15 @@ export class PersonService {
 
   /**
    * Yeni sicil (öğrenci / öğretmen / veli) ekler.
-   * Hangi component'ten çağrıldığı fark etmez; ayrımı `personData.userdef` yapar
-   * (11: öğrenci, 12: öğretmen, 13: veli).
-   *
-   * NOT: Backend'in gerçekte beklediği TÜM alanlar (çalışan legacy arayüzden
-   * yakalanan network logu baz alınarak) burada dolduruluyor. Formdan gelmeyen
-   * alanlar için backend'in kabul ettiği varsayılan değerler kullanılıyor.
-   * okod17-okod20 için "undefined" string'i legacy sistemde de aynen
-   * gönderiliyor (muhtemelen eski koddaki bir kusur) — backend bunu kabul
-   * ettiği için biz de birebir koruyoruz.
+   * Hangi component'ten çağrıldığı fark etmez; ayrımı `personData.userdef` yapar.
    */
   insertPerson(personData: PersonInsertRequest): Observable<unknown> {
-    const apiUrl = `${this.config.apiUrl}/Person`;
-
     if (!personData || personData.userdef == null) {
       throw new Error('userdef zorunludur (11: Öğrenci, 12: Öğretmen, 13: Veli).');
     }
 
-    const paramString = this.buildParamString({
-      islemtipi: 'i',
-      id: 0,
-      ad: personData.ad || '',
-      soyad: personData.soyad || '',
-      sicilno: personData.sicilno || '',
-      personelno: personData.personelno || '',
-      firma: personData.firma || '',
-      bolum: personData.bolum || '',
-      pozisyon: personData.pozisyon || '',
-      gorev: personData.gorev || '',
-      altfirma: personData.altfirma || '',
-      yaka: personData.yaka || '',
-      direktorluk: personData.direktorluk || '',
-      kangrubu: personData.kangrubu || '',
-      cinsiyet: personData.cinsiyet || '',
-      maastipi: '',
-      adres: personData.adres || ' ',
-      il: personData.il || '',
-      ilce: personData.ilce || '',
-      email: personData.email || '',
-      dogumtarih: personData.dogumtarih || '',
-      giristarih: personData.giristarih || '',
-      telefon1: personData.telefon1 || '',
-      ceptelefon: personData.ceptelefon || '',
-      okod1: personData.okod1 || '',
-      okod2: '',
-      okod3: '',
-      okod4: '',
-      okod5: '',
-      okod6: '',
-      okod7: '',
-      okod8: '',
-      okod9: '',
-      okod10: '',
-      okod11: '',
-      okod12: '',
-      okod13: '',
-      okod14: '',
-      okod15: '',
-      okod16: '',
-      okod17: 'undefined',
-      okod18: 'undefined',
-      okod19: 'undefined',
-      okod20: 'undefined',
-      cardid: personData.cardid || '',
-      cardid26: '',
-      facilitycode: '',
-      master: '',
-      bypasscard: '',
-      puantaj: '',
-      userdef: personData.userdef,
-      fazlamesai: 0,
-      eksikmesai: 0,
-      erkenmesai: 0,
-      eksikgun: 0,
-      gecezammi: 0,
-      eksikfm: 0,
-      eksikfmas: 0,
-    });
-
-    const encryptedParam = this.prepareService.prepare(paramString);
-
-    const payload = {
-      Param: encryptedParam,
-      FotoImage: personData.fotoImage
-        ? JSON.stringify([{ fotoimage: personData.fotoImage }])
-        : JSON.stringify([{ fotoimage: null }]),
-    };
-
-    return this.http.post<unknown>(apiUrl, payload);
+    const payload = this.buildPersonPayload(personData, 'i', 0);
+    return this.http.post<unknown>(`${this.config.apiUrl}/Person`, payload);
   }
 
   /**
@@ -162,83 +167,12 @@ export class PersonService {
    * `islemtipi: 'u'` ve gerçek `id` gönderilir.
    */
   updatePerson(personData: PersonInsertRequest & { id: number }): Observable<unknown> {
-    const apiUrl = `${this.config.apiUrl}/Person`;
-
     if (!personData || personData.userdef == null) {
       throw new Error('userdef zorunludur (11: Öğrenci, 12: Öğretmen, 13: Veli).');
     }
 
-    const paramString = this.buildParamString({
-      islemtipi: 'u',
-      id: personData.id,
-      ad: personData.ad || '',
-      soyad: personData.soyad || '',
-      sicilno: personData.sicilno || '',
-      personelno: personData.personelno || '',
-      firma: personData.firma || '',
-      bolum: personData.bolum || '',
-      pozisyon: personData.pozisyon || '',
-      gorev: personData.gorev || '',
-      altfirma: personData.altfirma || '',
-      yaka: personData.yaka || '',
-      direktorluk: personData.direktorluk || '',
-      kangrubu: personData.kangrubu || '',
-      cinsiyet: personData.cinsiyet || '',
-      maastipi: '',
-      adres: personData.adres || ' ',
-      il: personData.il || '',
-      ilce: personData.ilce || '',
-      email: personData.email || '',
-      dogumtarih: personData.dogumtarih || '',
-      giristarih: personData.giristarih || '',
-      telefon1: personData.telefon1 || '',
-      ceptelefon: personData.ceptelefon || '',
-      okod1: personData.okod1 || '',
-      okod2: '',
-      okod3: '',
-      okod4: '',
-      okod5: '',
-      okod6: '',
-      okod7: '',
-      okod8: '',
-      okod9: '',
-      okod10: '',
-      okod11: '',
-      okod12: '',
-      okod13: '',
-      okod14: '',
-      okod15: '',
-      okod16: '',
-      okod17: 'undefined',
-      okod18: 'undefined',
-      okod19: 'undefined',
-      okod20: 'undefined',
-      cardid: personData.cardid || '',
-      cardid26: '',
-      facilitycode: '',
-      master: '',
-      bypasscard: '',
-      puantaj: '',
-      userdef: personData.userdef,
-      fazlamesai: 0,
-      eksikmesai: 0,
-      erkenmesai: 0,
-      eksikgun: 0,
-      gecezammi: 0,
-      eksikfm: 0,
-      eksikfmas: 0,
-    });
-
-    const encryptedParam = this.prepareService.prepare(paramString);
-
-    const payload = {
-      Param: encryptedParam,
-      FotoImage: personData.fotoImage
-        ? JSON.stringify([{ fotoimage: personData.fotoImage }])
-        : JSON.stringify([{ fotoimage: null }]),
-    };
-
-    return this.http.post<unknown>(apiUrl, payload);
+    const payload = this.buildPersonPayload(personData, 'u', personData.id);
+    return this.http.post<unknown>(`${this.config.apiUrl}/Person`, payload);
   }
 
   /**
@@ -274,7 +208,7 @@ export class PersonService {
   updateTeacherLinks(studentId: number, newTeacherIds: number[], allPersons: Person[]): void {
     for (const target of allPersons) {
       if (target.id === studentId) continue;
-      if (target.userdef !== 12) continue; // only sync to teachers
+      if (target.userdef !== UserDef.Ogretmen) continue; // only sync to teachers
 
       const currentParentIds = extractLinkedPersonIds(target.personelno);
       const currentTeacherIds = extractLinkedTeacherIds(target.personelno);
