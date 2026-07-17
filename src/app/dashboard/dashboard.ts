@@ -4,7 +4,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { PersonService } from '../services/person.service';
 import { Person } from '../core/person.model';
 import { AuthService } from '../services/auth.service';
-import { HelperService } from '../services/helper.service';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { DialogModule } from 'primeng/dialog';
@@ -73,7 +72,6 @@ export class DashboardComponent implements OnInit {
   /* ── Inject ────────────────────────────────────────────── */
   private personService = inject(PersonService);
   private authService = inject(AuthService);
-  private helper = inject(HelperService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
@@ -212,7 +210,7 @@ export class DashboardComponent implements OnInit {
 
   getUserName(): string {
     return (
-      this.helper.userLoginModel?.fullname || this.helper.userLoginModel?.loginname || 'Kullanıcı'
+      this.authService.currentUserValue?.fullname || this.authService.currentUserValue?.loginname || 'Kullanıcı'
     );
   }
 

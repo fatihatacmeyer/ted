@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, switchMap } from 'rxjs';
 import { APP_CONFIG, AppConfig } from './app-config.service';
-import { HelperService } from './helper.service';
 import { Person, PersonInsertRequest, ExitReason, extractLinkedPersonIds, extractLinkedTeacherIds, buildLinkedPersonelno } from '../core/person.model';
 import { AuthService } from './auth.service';
 import { PrepareService } from './prepare.service';
@@ -13,7 +12,6 @@ import { PrepareService } from './prepare.service';
 export class PersonService {
   private http = inject(HttpClient);
   private config: AppConfig = inject(APP_CONFIG);
-  private helper = inject(HelperService);
   private authService = inject(AuthService);
   private prepareService = inject(PrepareService);
 
