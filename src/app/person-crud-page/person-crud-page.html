@@ -37,9 +37,10 @@
         [tableId]="USERDEF.toString()"
         [allPersons]="allPersons"
         [columnOverrides]="columnOverrides"
+        [showLeaveButton]="USERDEF === UserDef.Ogrenci"
+        [showActionsColumn]="showActionsColumn"
         (rowClick)="onRowClick($event)"
-        (terminateRequest)="onTerminateRequest($event)"
-        (restoreRequest)="onRestoreRequest($event)"
+        (leaveRequest)="onLeaveRequest($event)"
       ></app-person-table>
     }
   </div>
@@ -53,6 +54,8 @@
     [userdefContext]="USERDEF"
     (personClick)="onLinkedPersonClick($event)"
     (editRequest)="onEditRequest($event)"
+    (exitRequest)="onProfileExitRequest($event)"
+    (restoreRequest)="onProfileRestoreRequest($event)"
   ></app-person-profile>
 }
 
@@ -74,3 +77,10 @@
   (visibleChange)="onExitDialogClose()"
   (confirmed)="onExitConfirmed()"
 ></app-person-exit-dialog>
+
+<app-person-leave-dialog
+  [(visible)]="showLeaveDialog"
+  [person]="leavePerson"
+  (visibleChange)="onLeaveDialogClose()"
+  (confirmed)="onLeaveConfirmed()"
+></app-person-leave-dialog>

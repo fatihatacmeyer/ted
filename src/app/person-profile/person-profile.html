@@ -77,6 +77,25 @@
       }
 
       <div class="profile-actions">
+        <div class="profile-actions-left">
+          @if (isPersonActive) {
+            <button
+              pButton
+              type="button"
+              class="p-button-danger p-button-outlined"
+              icon="pi pi-times"
+              (click)="onExitClick()"
+            >Çıkış Ver</button>
+          } @else {
+            <button
+              pButton
+              type="button"
+              class="p-button-success p-button-outlined"
+              icon="pi pi-replay"
+              (click)="onRestoreClick()"
+            >İşe Geri Al</button>
+          }
+        </div>
         <button
           pButton
           type="button"

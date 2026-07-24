@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, switchMap } from 'rxjs';
 import { APP_CONFIG, AppConfig } from './app-config.service';
-import { Person, PersonInsertRequest, ExitReason, UserDef, extractLinkedPersonIds, extractLinkedTeacherIds, buildLinkedPersonelno } from '../core/person.model';
+import { Person, PersonInsertRequest, PersonLeaveRequest, ExitReason, UserDef, LeaveRequestResponse, ReportLinkResponse, extractLinkedPersonIds, extractLinkedTeacherIds, buildLinkedPersonelno } from '../core/person.model';
 import { PrepareService } from './prepare.service';
 
 @Injectable({
@@ -296,6 +296,52 @@ export class PersonService {
     const apiUrl = `${this.config.apiUrl}/Dynamic?Name=${encodeURIComponent(encryptedParam)}`;
 
     return this.http.get<unknown>(apiUrl);
+  }
+
+  requestLeave(leaveRequest: PersonLeaveRequest): Observable<LeaveRequestResponse[]> {
+    // Legacy JS'te boş değişkenler string concatenation sırasında "undefined" string'ine dönüşür.
+    // Backend bu formatta parse ettiği için aynı davranışı koruyoruz.
+    const params = {
+      point: 'talep',
+      kaynak: 'izin',
+      bastarih: leaveRequest.bastarih,
+      bittarih: leaveRequest.bittarih,
+      siciller: leaveRequest.siciller,
+      tip: 30,
+      islemtipi: 'i',
+      izinadresi: leaveRequest.izinadresi || 'undefined',
+      ulasim: leaveRequest.ulasim,
+      yemek: leaveRequest.yemek,
+      aciklama: leaveRequest.aciklama || 'undefined',
+    };
+
+    const paramString = this.buildParamString(params);
+    const encryptedParam = this.prepareService.prepare(paramString);
+
+    const apiUrl = `${this.config.apiUrl}/Dynamic?Name=${encodeURIComponent(encryptedParam)}`;
+
+    return this.http.get<LeaveRequestResponse[]>(apiUrl);
+  }
+
+  /**
+   * İzin formu PDF'ini getirir.
+   * Legacy: formgosternew(formid, 'izin') → GET /report?Name={encrypted}
+   * Params: islemtipi=s&reportid=IZINFORM&params=id:{formid}&islemno=1
+   */
+  getLeaveReport(formid: string): Observable<ReportLinkResponse[]> {
+    const params = {
+      islemtipi: 's',
+      reportid: 'IZINFORM',
+      params: `id:${formid}`,
+      islemno: 1,
+    };
+
+    const paramString = this.buildParamString(params);
+    const encryptedParam = this.prepareService.prepare(paramString);
+
+    const apiUrl = `${this.config.apiUrl}/report?Name=${encodeURIComponent(encryptedParam)}`;
+
+    return this.http.get<ReportLinkResponse[]>(apiUrl);
   }
 
   restorePerson(sicilId: number, girisTarihi: string): Observable<unknown> {

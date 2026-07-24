@@ -112,7 +112,9 @@
           <th [ngClass]="'col-' + col.field">{{ col.header }}</th>
         }
       }
+      @if (showActionsColumn) {
       <th class="col-actions">İşlem</th>
+      }
     </tr>
   </ng-template>
 
@@ -133,35 +135,25 @@
           }
         </td>
       }
+      @if (showActionsColumn) {
       <td class="col-actions">
-        @if (!person.cikistarih) {
-          <button
-            pButton
-            icon="pi pi-times"
-            class="p-button-danger p-button-text p-button-sm"
-            aria-label="Çıkış Ver"
-            pTooltip="Çıkış Ver"
-            tooltipPosition="top"
-            (click)="terminateRequest.emit(person); $event.stopPropagation()"
-          ></button>
-        } @else {
-          <button
-            pButton
-            icon="pi pi-replay"
-            class="p-button-success p-button-text p-button-sm"
-            aria-label="İşe Geri Al"
-            pTooltip="İşe Geri Al"
-            tooltipPosition="top"
-            (click)="restoreRequest.emit(person); $event.stopPropagation()"
-          ></button>
-        }
+        <button
+          *ngIf="showLeaveButton"
+          pButton
+          type="button"
+          icon="pi pi-calendar-plus"
+          class="p-button-text p-button-sm p-button-success"
+          pTooltip="İzin Ata"
+          (click)="onLeaveRequest($event, person)"
+        ></button>
       </td>
+      }
     </tr>
   </ng-template>
 
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td [attr.colspan]="getVisibleColumns().length">
+      <td [attr.colspan]="getVisibleColumns().length + (showActionsColumn ? 1 : 0)">
         <div class="d-flex flex-column align-items-center py-5">
           <i class="pi pi-inbox text-4xl text-muted mb-3"></i>
           <span class="text-muted">Kayıt bulunamadı.</span>

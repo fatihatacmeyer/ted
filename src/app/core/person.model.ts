@@ -163,6 +163,34 @@ export interface LinkedPerson {
   sicilno?: string;
 }
 
+/**
+ * İzin talebi sonucu (talepkaydet).
+ * Legacy: talepkaydet() → { sonuc: number, formid: string }
+ */
+export interface LeaveRequestResponse {
+  sonuc: number;
+  formid: string;
+}
+
+/** PDF rapor linki */
+export interface ReportLinkResponse {
+  link: string;
+}
+
+export interface PersonLeaveRequest {
+  bastarih: string;      // start date (dd-mm-yyyy format)
+  bittarih: string;      // end date (dd-mm-yyyy format)
+  siciller: string;      // sicilno value (single person's sicilno string)
+  tip: number;           // fixed: 30
+  islemtipi: string;     // fixed: 'i'
+  izinadresi: string;    // leave address
+  ulasim: number;        // transport: 0 or 1
+  yemek: number;         // meal: 0 or 1
+  aciklama: string;      // description
+  kaynak: string;        // fixed: 'izin'
+  point: string;         // fixed: 'talep'
+}
+
 export function parseLinkedIds(raw: string | null | undefined): number[] {
   if (!raw || raw.trim() === '' || raw === '- - - - - - -') return [];
   return raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));

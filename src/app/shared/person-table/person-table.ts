@@ -10,6 +10,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { TooltipModule } from 'primeng/tooltip';
 import { ButtonModule } from 'primeng/button';
 
+
 export interface ColumnDef {
   field: string;
   header: string;
@@ -43,8 +44,10 @@ export class PersonTableComponent implements OnInit {
   @Input() columnOverrides: { field: string; header: string }[] = [];
   @Input() allPersons: Person[] = [];
   @Output() rowClick = new EventEmitter<Person>();
-  @Output() terminateRequest = new EventEmitter<Person>();
-  @Output() restoreRequest = new EventEmitter<Person>();
+  @Output() leaveRequest = new EventEmitter<Person>();
+
+  @Input() showLeaveButton = false;
+  @Input() showActionsColumn = true;
 
   allColumns: ColumnDef[] = [
     { field: 'ad', header: 'Ad', sortable: true, filterable: true },
@@ -138,6 +141,13 @@ export class PersonTableComponent implements OnInit {
     if (!this.allPersons.length) return '-';
     const linked = resolveLinkedNames(ids, this.allPersons);
     return linked.map((l) => l.name).join(', ');
+  }
+
+  /* ── Selection & Leave ─────────────────────────────────── */
+
+  onLeaveRequest(event: Event, person: Person): void {
+    event.stopPropagation();
+    this.leaveRequest.emit(person);
   }
 
   /* ── Column Selector Panel ─────────────────────────────── */

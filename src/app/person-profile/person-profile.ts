@@ -21,6 +21,8 @@ export class PersonProfileComponent {
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() personClick = new EventEmitter<Person>();
   @Output() editRequest = new EventEmitter<Person>();
+  @Output() exitRequest = new EventEmitter<Person>();
+  @Output() restoreRequest = new EventEmitter<Person>();
 
   get linkedPersons(): LinkedPerson[] {
     if (!this.person) return [];
@@ -80,6 +82,22 @@ export class PersonProfileComponent {
   onEditClick(): void {
     if (this.person) {
       this.editRequest.emit(this.person);
+    }
+  }
+
+  get isPersonActive(): boolean {
+    return this.person ? !this.person.cikistarih : false;
+  }
+
+  onExitClick(): void {
+    if (this.person) {
+      this.exitRequest.emit(this.person);
+    }
+  }
+
+  onRestoreClick(): void {
+    if (this.person) {
+      this.restoreRequest.emit(this.person);
     }
   }
 

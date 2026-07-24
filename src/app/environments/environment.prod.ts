@@ -5,4 +5,6 @@ export const environment = {
   isMockEnabled: false,
   isAuthEnabled: true,
   apiUrl: '',
+  /** Prod'da Angular app aynı origin'de barındırıldığı için relative URL yeterli */
+  reportBaseUrl: '',
 };

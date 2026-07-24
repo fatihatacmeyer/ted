@@ -12,6 +12,7 @@ import {
 import { PersonTableComponent } from '../shared/person-table/person-table';
 import { PersonFormComponent } from '../person-form/person-form';
 import { PersonExitDialogComponent } from '../person-exit-dialog/person-exit-dialog';
+import { PersonLeaveDialogComponent } from '../person-leave-dialog/person-leave-dialog';
 import { PersonProfileComponent } from '../person-profile/person-profile';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -23,6 +24,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
     PersonTableComponent,
     PersonFormComponent,
     PersonExitDialogComponent,
+    PersonLeaveDialogComponent,
     PersonProfileComponent,
     ButtonModule,
     ProgressSpinnerModule,
@@ -34,6 +36,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 export class PersonCrudPageComponent implements OnInit {
   /** Route'dan gelen userdef değeri. */
   readonly USERDEF: UserDef;
+  readonly UserDef = UserDef;
 
   persons: Person[] = [];
   allPersons: Person[] = [];
@@ -44,6 +47,8 @@ export class PersonCrudPageComponent implements OnInit {
   showExitDialog = false;
   exitPerson: Person | null = null;
   exitMode: 'exit' | 'restore' = 'exit';
+  showLeaveDialog = false;
+  leavePerson: Person | null = null;
   showProfileModal = false;
   selectedProfilePerson: Person | null = null;
 
@@ -78,9 +83,14 @@ export class PersonCrudPageComponent implements OnInit {
     );
   }
 
-  /** Öğrenci ve Veli sayfalarında profil modalı gösterilir. */
+  /** Tüm personel tiplerinde profil modalı gösterilir. */
   get hasProfileModal(): boolean {
-    return this.USERDEF !== UserDef.Ogretmen;
+    return true;
+  }
+
+  /** İşlem kolu sadece Ogrenci sayfasında gösterilir (İzin Ata). */
+  get showActionsColumn(): boolean {
+    return this.USERDEF === UserDef.Ogrenci;
   }
 
   /** Ogrenci ve Veli sayfalarında allPersons gereklidir. */
@@ -139,13 +149,8 @@ export class PersonCrudPageComponent implements OnInit {
   }
 
   onRowClick(person: Person): void {
-    if (this.hasProfileModal) {
-      this.selectedProfilePerson = person;
-      this.showProfileModal = true;
-    } else {
-      this.editPerson = person;
-      this.showAddDialog = true;
-    }
+    this.selectedProfilePerson = person;
+    this.showProfileModal = true;
   }
 
   onEditDialogClose(): void {
@@ -177,24 +182,28 @@ export class PersonCrudPageComponent implements OnInit {
 
   // ─── Exit / Restore ───
 
-  onTerminateRequest(person: Person): void {
-    this.exitPerson = person;
-    this.exitMode = 'exit';
-    this.showExitDialog = true;
-  }
-
-  onRestoreRequest(person: Person): void {
-    this.exitPerson = person;
-    this.exitMode = 'restore';
-    this.showExitDialog = true;
-  }
-
   onExitDialogClose(): void {
     this.exitPerson = null;
   }
 
   onExitConfirmed(): void {
     this.exitPerson = null;
+    this.fetchPersonList();
+  }
+
+  // ─── Leave ───
+
+  onLeaveRequest(person: Person): void {
+    this.leavePerson = person;
+    this.showLeaveDialog = true;
+  }
+
+  onLeaveDialogClose(): void {
+    this.leavePerson = null;
+  }
+
+  onLeaveConfirmed(): void {
+    this.leavePerson = null;
     this.fetchPersonList();
   }
 
@@ -208,6 +217,20 @@ export class PersonCrudPageComponent implements OnInit {
     this.showProfileModal = false;
     this.editPerson = person;
     this.showAddDialog = true;
+  }
+
+  onProfileExitRequest(person: Person): void {
+    this.showProfileModal = false;
+    this.exitPerson = person;
+    this.exitMode = 'exit';
+    this.showExitDialog = true;
+  }
+
+  onProfileRestoreRequest(person: Person): void {
+    this.showProfileModal = false;
+    this.exitPerson = person;
+    this.exitMode = 'restore';
+    this.showExitDialog = true;
   }
 
   getLinkedIds(person: Person): number[] {

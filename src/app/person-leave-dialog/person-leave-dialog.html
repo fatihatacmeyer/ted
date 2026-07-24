@@ -1,0 +1,109 @@
+<p-dialog
+  [header]="dialogTitle"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '480px' }"
+  [visible]="visible"
+  (visibleChange)="close()"
+>
+  <div class="leave-dialog-body">
+    @if (errorMessage) {
+      <div class="error-box">
+        <p>{{ errorMessage }}</p>
+      </div>
+    }
+
+    <div class="field">
+      <label class="field-label" for="startDate">Başlangıç Tarihi</label>
+      <input
+        pInputText
+        id="startDate"
+        [value]="selectedStartDate | date:'dd.MM.yyyy'"
+        [readonly]="true"
+        [style]="{ width: '100%' }"
+      />
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="endDate">Bitiş Tarihi</label>
+      <input
+        pInputText
+        id="endDate"
+        [value]="selectedEndDate | date:'dd.MM.yyyy'"
+        [readonly]="true"
+        [style]="{ width: '100%' }"
+      />
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="leaveAddress">İzin Adresi <span class="required">*</span></label>
+      <input
+        pInputText
+        id="leaveAddress"
+        [(ngModel)]="leaveAddress"
+        placeholder="İzin adresi girin"
+        [style]="{ width: '100%' }"
+      />
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="description">Açıklama</label>
+      <textarea
+        pTextarea
+        id="description"
+        [(ngModel)]="description"
+        placeholder="Açıklama girin (isteğe bağlı)"
+        rows="3"
+        [style]="{ width: '100%' }"
+      ></textarea>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-actions">
+      <button
+        pButton
+        label="İptal"
+        class="p-button-text"
+        aria-label="İptal"
+        (click)="close()"
+        [disabled]="isProcessing"
+      ></button>
+      <button
+        pButton
+        label="Gönder"
+        class="p-button-success"
+        icon="pi pi-send"
+        aria-label="İzini onayla"
+        (click)="onConfirm()"
+        [disabled]="!isFormValid || isProcessing"
+      ></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- İzin Formu PDF Dialog -->
+<p-dialog
+  header="İzin Formu"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="true"
+  [style]="{ width: '800px', height: '600px' }"
+  [visible]="pdfVisible"
+  (visibleChange)="onPdfClose()"
+>
+  <div class="pdf-container">
+    @if (pdfUrl) {
+      <iframe
+        [src]="pdfUrl"
+        class="pdf-iframe"
+        title="İzin Formu PDF"
+      ></iframe>
+    } @else {
+      <div class="pdf-loading">
+        <p>PDF yükleniyor...</p>
+      </div>
+    }
+  </div>
+</p-dialog>
